@@ -8,7 +8,12 @@ export default defineSchema({
   users: defineTable({
     clerkId: v.string(),
     email: v.string(),
-    role: v.union(v.literal("superadmin"), v.literal("coach")),
+    role: v.union(
+      v.literal("superadmin"),
+      v.literal("admin"),
+      v.literal("cashier"),
+      v.literal("coach")
+    ),
     fullName: v.string(),
     phone: v.optional(v.string()),
     isActive: v.boolean(),
@@ -97,7 +102,7 @@ export default defineSchema({
     monthCovered: v.number(), // mois payé (1-12)
     yearCovered: v.number(),
     receivedBy: v.id("users"),
-    paymentMethod: v.literal("cash"),
+    paymentMethod: v.union(v.literal("cash"), v.literal("card"), v.literal("transfer")),
     receiptNumber: v.string(),
     notes: v.optional(v.string()),
     createdAt: v.number(),
@@ -158,7 +163,7 @@ export default defineSchema({
 
   // Table auditLog (Journal d'activité)
   auditLog: defineTable({
-    userId: v.id("users"),
+    userId: v.optional(v.id("users")), // optionnel pour les actions système (cron jobs)
     action: v.string(),
     entityType: v.string(),
     entityId: v.string(),

@@ -1,27 +1,58 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
 
+// ─── Membres ──────────────────────────────────────────────────────────────────
+
 export const getMembers = query({
-  args: { 
+  args: {
     familyId: v.optional(v.id("families")),
     isActive: v.optional(v.boolean()),
-    searchLastName: v.optional(v.string())
+    searchLastName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let members = await ctx.db.query("members").collect();
-    
-    if (args.familyId) {
-      members = members.filter((m) => m.familyId === args.familyId);
+    // Cas 1 : filtrer par famille (index disponible)
+    if (args.familyId !== undefined) {
+      let members = await ctx.db
+        .query("members")
+        .withIndex("by_familyId", (q) => q.eq("familyId", args.familyId))
+        .collect();
+
+      if (args.isActive !== undefined) {
+        members = members.filter((m) => m.isActive === args.isActive);
+      }
+      if (args.searchLastName) {
+        const search = args.searchLastName.toLowerCase();
+        members = members.filter((m) =>
+          m.lastName.toLowerCase().includes(search)
+        );
+      }
+      return members;
     }
+
+    // Cas 2 : filtrer par isActive (index disponible)
     if (args.isActive !== undefined) {
-      members = members.filter((m) => m.isActive === args.isActive);
+      let members = await ctx.db
+        .query("members")
+        .withIndex("by_isActive", (q) => q.eq("isActive", args.isActive!))
+        .collect();
+
+      if (args.searchLastName) {
+        const search = args.searchLastName.toLowerCase();
+        members = members.filter((m) =>
+          m.lastName.toLowerCase().includes(search)
+        );
+      }
+      return members;
     }
+
+    // Cas 3 : recherche par nom (scan total mais nécessaire — pas d'index texte)
+    let members = await ctx.db.query("members").collect();
     if (args.searchLastName) {
-      members = members.filter((m) => 
-        m.lastName.toLowerCase().includes(args.searchLastName!.toLowerCase())
+      const search = args.searchLastName.toLowerCase();
+      members = members.filter((m) =>
+        m.lastName.toLowerCase().includes(search)
       );
     }
-    
     return members;
   },
 });
@@ -38,11 +69,12 @@ export const getMemberWithSubscriptions = query({
   handler: async (ctx, args) => {
     const member = await ctx.db.get(args.id);
     if (!member) return null;
-    
-    const subscriptions = await ctx.db.query("memberSubscriptions")
+
+    const subscriptions = await ctx.db
+      .query("memberSubscriptions")
       .withIndex("by_memberId", (q) => q.eq("memberId", args.id))
       .collect();
-    
+
     return { member, subscriptions };
   },
 });
