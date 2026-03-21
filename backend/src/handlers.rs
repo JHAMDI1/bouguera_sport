@@ -6,7 +6,11 @@ use crate::models::{
     AuthRequest, AuthResponse, CreateExpenseRequest, CreatePaymentRequest,
     CreatePaymentResponse, ErrorResponse, ReceiptData, User, UserRole,
 };
-use crate::services::{generate_receipt_pdf, generate_receipt_number, verify_clerk_token};
+use crate::services::{
+    generate_receipt_pdf, generate_receipt_number, get_convex_client, verify_clerk_token,
+};
+
+// ─── Health ───────────────────────────────────────────────────────────────────
 
 pub async fn health_check() -> impl Responder {
     HttpResponse::Ok().json(json!({
@@ -16,102 +20,248 @@ pub async fn health_check() -> impl Responder {
     }))
 }
 
+// ─── Authentification ─────────────────────────────────────────────────────────
+
+/// Vérifie le token Clerk, récupère le rôle depuis Convex, retourne un JWT interne
 pub async fn auth(
     req: web::Json<AuthRequest>,
     config: web::Data<Config>,
 ) -> impl Responder {
-    match verify_clerk_token(&req.token, config.clone()).await {
-        Ok(user_data) => {
-            let user = User {
-                id: uuid::Uuid::new_v4().to_string(),
-                clerk_id: user_data.clerk_id,
-                email: user_data.email,
-                full_name: user_data.full_name,
-                role: UserRole::Admin, // This should come from your database
-                is_active: true,
-                created_at: chrono::Utc::now(),
-            };
-
-            // Generate JWT token
-            let access_token = match crate::services::generate_jwt(&user, &config.jwt_secret) {
-                Ok(token) => token,
-                Err(e) => {
-                    return HttpResponse::InternalServerError().json(ErrorResponse {
-                        error: "token_generation_failed".to_string(),
-                        message: format!("Failed to generate token: {}", e),
-                        status_code: 500,
-                    });
-                }
-            };
-
-            HttpResponse::Ok().json(AuthResponse {
-                user,
-                access_token,
+    // 1. Vérification du token Clerk (JWKS ou REST)
+    let clerk_user = match verify_clerk_token(&req.token, config.clone()).await {
+        Ok(u) => u,
+        Err(e) => {
+            return HttpResponse::Unauthorized().json(ErrorResponse {
+                error: "authentication_failed".to_string(),
+                message: e,
+                status_code: 401,
             })
         }
-        Err(e) => HttpResponse::Unauthorized().json(ErrorResponse {
-            error: "authentication_failed".to_string(),
-            message: e,
-            status_code: 401,
+    };
+
+    // 2. Récupération du rôle depuis Convex (table users)
+    let role = if let Some(convex) = get_convex_client() {
+        match convex
+            .query(
+                "users:getUserByClerkId",
+                json!({ "clerkId": clerk_user.clerk_id }),
+            )
+            .await
+        {
+            Ok(result) => {
+                let role_str = result["value"]["role"].as_str().unwrap_or("coach");
+                match role_str {
+                    "superadmin" => UserRole::SuperAdmin,
+                    "admin" => UserRole::Admin,
+                    "cashier" => UserRole::Cashier,
+                    _ => UserRole::Coach,
+                }
+            }
+            Err(e) => {
+                log::warn!("Impossible de récupérer le rôle depuis Convex: {}. Défaut: Coach", e);
+                UserRole::Coach
+            }
+        }
+    } else {
+        log::warn!("ConvexClient non initialisé, rôle par défaut: Coach");
+        UserRole::Coach
+    };
+
+    let user = User {
+        id: uuid::Uuid::new_v4().to_string(),
+        clerk_id: clerk_user.clerk_id,
+        email: clerk_user.email,
+        full_name: clerk_user.full_name,
+        role,
+        is_active: true,
+        created_at: chrono::Utc::now(),
+    };
+
+    // 3. Génération du JWT interne
+    match crate::services::generate_jwt(&user, &config.jwt_secret) {
+        Ok(access_token) => HttpResponse::Ok().json(AuthResponse { user, access_token }),
+        Err(e) => HttpResponse::InternalServerError().json(ErrorResponse {
+            error: "token_generation_failed".to_string(),
+            message: format!("Erreur génération JWT: {}", e),
+            status_code: 500,
         }),
     }
 }
+
+// ─── Paiements ────────────────────────────────────────────────────────────────
 
 pub async fn create_payment(
     req: web::Json<CreatePaymentRequest>,
     _config: web::Data<Config>,
 ) -> impl Responder {
-    // Validate request
+    // Validation
     if req.amount <= 0.0 {
         return HttpResponse::BadRequest().json(ErrorResponse {
             error: "invalid_amount".to_string(),
-            message: "Amount must be greater than 0".to_string(),
+            message: "Le montant doit être supérieur à 0".to_string(),
             status_code: 400,
         });
     }
-
     if req.member_id.is_none() && req.family_id.is_none() {
         return HttpResponse::BadRequest().json(ErrorResponse {
             error: "missing_beneficiary".to_string(),
-            message: "Either member_id or family_id must be provided".to_string(),
+            message: "member_id ou family_id est requis".to_string(),
+            status_code: 400,
+        });
+    }
+    if req.month_covered < 1 || req.month_covered > 12 {
+        return HttpResponse::BadRequest().json(ErrorResponse {
+            error: "invalid_month".to_string(),
+            message: "month_covered doit être entre 1 et 12".to_string(),
             status_code: 400,
         });
     }
 
-    // Generate receipt number
     let receipt_number = generate_receipt_number();
-    let payment_id = uuid::Uuid::new_v4().to_string();
     let payment_date = chrono::Utc::now();
 
-    // In a real implementation, you would:
-    // 1. Call Convex to create the payment
-    // 2. Update member/family subscription status
-    // 3. Generate and store receipt PDF
-    // 4. Send notification if needed
-
-    let response = CreatePaymentResponse {
-        payment_id,
-        receipt_number,
-        amount: req.amount,
-        payment_date,
+    // Persister dans Convex
+    let convex = match get_convex_client() {
+        Some(c) => c,
+        None => {
+            return HttpResponse::InternalServerError().json(ErrorResponse {
+                error: "convex_unavailable".to_string(),
+                message: "Service de base de données indisponible".to_string(),
+                status_code: 503,
+            })
+        }
     };
 
-    HttpResponse::Created().json(response)
+    let convex_args = json!({
+        "memberId": req.member_id,
+        "familyId": req.family_id,
+        "amount": req.amount,
+        "monthCovered": req.month_covered,
+        "yearCovered": req.year_covered,
+        "paymentMethod": "cash",
+        "receiptNumber": receipt_number,
+        "notes": req.notes,
+        "paymentDate": payment_date.timestamp_millis(),
+    });
+
+    match convex.mutation("mutations:createPayment", convex_args).await {
+        Ok(result) => {
+            let payment_id = result["value"]
+                .as_str()
+                .unwrap_or("")
+                .to_string();
+
+            HttpResponse::Created().json(CreatePaymentResponse {
+                payment_id,
+                receipt_number,
+                amount: req.amount,
+                payment_date,
+            })
+        }
+        Err(e) => {
+            log::error!("Erreur création paiement Convex: {}", e);
+            HttpResponse::InternalServerError().json(ErrorResponse {
+                error: "payment_creation_failed".to_string(),
+                message: format!("Impossible de créer le paiement: {}", e),
+                status_code: 500,
+            })
+        }
+    }
 }
+
+pub async fn cancel_payment(
+    payment_id: web::Path<String>,
+    _config: web::Data<Config>,
+) -> impl Responder {
+    let convex = match get_convex_client() {
+        Some(c) => c,
+        None => {
+            return HttpResponse::InternalServerError().json(ErrorResponse {
+                error: "convex_unavailable".to_string(),
+                message: "Service de base de données indisponible".to_string(),
+                status_code: 503,
+            })
+        }
+    };
+
+    let cancelled_at = chrono::Utc::now();
+
+    match convex
+        .mutation(
+            "payments:cancelPayment",
+            json!({
+                "paymentId": payment_id.to_string(),
+                "cancelledAt": cancelled_at.timestamp_millis(),
+            }),
+        )
+        .await
+    {
+        Ok(_) => HttpResponse::Ok().json(json!({
+            "message": "Paiement annulé avec succès",
+            "payment_id": payment_id.to_string(),
+            "cancelled_at": cancelled_at.to_rfc3339(),
+        })),
+        Err(e) => {
+            log::error!("Erreur annulation paiement Convex: {}", e);
+            HttpResponse::InternalServerError().json(ErrorResponse {
+                error: "cancellation_failed".to_string(),
+                message: format!("Impossible d'annuler le paiement: {}", e),
+                status_code: 500,
+            })
+        }
+    }
+}
+
+// ─── Reçus ────────────────────────────────────────────────────────────────────
 
 pub async fn generate_receipt(
     receipt_number: web::Path<String>,
     _config: web::Data<Config>,
 ) -> impl Responder {
-    // Mock receipt data - in production, fetch from database
-    let receipt_data = ReceiptData {
-        receipt_number: receipt_number.to_string(),
-        member_name: "John Doe".to_string(),
-        amount: 50.000,
-        month: "Mars".to_string(),
-        year: 2026,
-        payment_date: chrono::Utc::now().format("%d/%m/%Y").to_string(),
-        received_by: "Admin User".to_string(),
+    // Récupérer les données réelles depuis Convex
+    let receipt_data = if let Some(convex) = get_convex_client() {
+        match convex
+            .query(
+                "payments:getPaymentByReceipt",
+                json!({ "receiptNumber": receipt_number.to_string() }),
+            )
+            .await
+        {
+            Ok(result) => {
+                let val = &result["value"];
+                ReceiptData {
+                    receipt_number: receipt_number.to_string(),
+                    member_name: val["memberName"].as_str().unwrap_or("Adhérent").to_string(),
+                    amount: val["amount"].as_f64().unwrap_or(0.0),
+                    month: val["monthCovered"].as_str().unwrap_or("").to_string(),
+                    year: val["yearCovered"].as_i64().unwrap_or(2026) as i32,
+                    payment_date: val["paymentDate"].as_str().unwrap_or("").to_string(),
+                    received_by: val["receivedBy"].as_str().unwrap_or("Admin").to_string(),
+                }
+            }
+            Err(e) => {
+                log::warn!("Paiement non trouvé dans Convex ({}), reçu minimal", e);
+                ReceiptData {
+                    receipt_number: receipt_number.to_string(),
+                    member_name: "Adhérent".to_string(),
+                    amount: 0.0,
+                    month: "".to_string(),
+                    year: chrono::Utc::now().format("%Y").to_string().parse().unwrap_or(2026),
+                    payment_date: chrono::Utc::now().format("%d/%m/%Y").to_string(),
+                    received_by: "Admin".to_string(),
+                }
+            }
+        }
+    } else {
+        ReceiptData {
+            receipt_number: receipt_number.to_string(),
+            member_name: "Adhérent".to_string(),
+            amount: 0.0,
+            month: "".to_string(),
+            year: 2026,
+            payment_date: chrono::Utc::now().format("%d/%m/%Y").to_string(),
+            received_by: "Admin".to_string(),
+        }
     };
 
     match generate_receipt_pdf(&receipt_data) {
@@ -124,26 +274,43 @@ pub async fn generate_receipt(
             .body(pdf_bytes),
         Err(e) => HttpResponse::InternalServerError().json(ErrorResponse {
             error: "pdf_generation_failed".to_string(),
-            message: format!("Failed to generate PDF: {}", e),
+            message: format!("Erreur génération PDF: {}", e),
             status_code: 500,
         }),
     }
 }
 
-pub async fn get_dashboard_stats(_config: web::Data<Config>) -> impl Responder {
-    // In production, fetch real data from Convex
-    let stats = json!({
-        "total_active_members": 150,
-        "monthly_revenue": 7500.0,
-        "monthly_expenses": 3200.0,
-        "net_profit": 4300.0,
-        "unpaid_count": 12,
-        "new_members_this_month": 8,
-        "expiring_certificates_count": 3,
-    });
+// ─── Dashboard ────────────────────────────────────────────────────────────────
 
-    HttpResponse::Ok().json(stats)
+pub async fn get_dashboard_stats(_config: web::Data<Config>) -> impl Responder {
+    let convex = match get_convex_client() {
+        Some(c) => c,
+        None => {
+            return HttpResponse::InternalServerError().json(ErrorResponse {
+                error: "convex_unavailable".to_string(),
+                message: "Service de base de données indisponible".to_string(),
+                status_code: 503,
+            })
+        }
+    };
+
+    match convex
+        .query("dashboard:getDashboardStats", json!({}))
+        .await
+    {
+        Ok(result) => HttpResponse::Ok().json(result["value"].clone()),
+        Err(e) => {
+            log::error!("Erreur récupération dashboard Convex: {}", e);
+            HttpResponse::InternalServerError().json(ErrorResponse {
+                error: "dashboard_fetch_failed".to_string(),
+                message: format!("Impossible de récupérer les statistiques: {}", e),
+                status_code: 500,
+            })
+        }
+    }
 }
+
+// ─── Dépenses ─────────────────────────────────────────────────────────────────
 
 pub async fn create_expense(
     req: web::Json<CreateExpenseRequest>,
@@ -152,34 +319,45 @@ pub async fn create_expense(
     if req.amount <= 0.0 {
         return HttpResponse::BadRequest().json(ErrorResponse {
             error: "invalid_amount".to_string(),
-            message: "Amount must be greater than 0".to_string(),
+            message: "Le montant doit être supérieur à 0".to_string(),
             status_code: 400,
         });
     }
 
-    let expense_id = uuid::Uuid::new_v4().to_string();
+    let convex = match get_convex_client() {
+        Some(c) => c,
+        None => {
+            return HttpResponse::InternalServerError().json(ErrorResponse {
+                error: "convex_unavailable".to_string(),
+                message: "Service de base de données indisponible".to_string(),
+                status_code: 503,
+            })
+        }
+    };
 
-    // In production, save to Convex
-    HttpResponse::Created().json(json!({
-        "expense_id": expense_id,
-        "message": "Expense recorded successfully"
-    }))
-}
+    let convex_args = json!({
+        "categoryId": req.category_id,
+        "amount": req.amount,
+        "description": req.description,
+        "expenseDate": req.expense_date.timestamp_millis(),
+        "receiptUrl": req.receipt_url,
+    });
 
-pub async fn cancel_payment(
-    payment_id: web::Path<String>,
-    _config: web::Data<Config>,
-) -> impl Responder {
-    // Only SuperAdmin can cancel payments
-    // In production:
-    // 1. Verify user has SuperAdmin role
-    // 2. Log the cancellation with reason
-    // 3. Update payment status in Convex
-    // 4. Recalculate member's subscription status
-
-    HttpResponse::Ok().json(json!({
-        "message": "Payment cancelled successfully",
-        "payment_id": payment_id.to_string(),
-        "cancelled_at": chrono::Utc::now().to_rfc3339(),
-    }))
+    match convex.mutation("coaches:createExpense", convex_args).await {
+        Ok(result) => {
+            let expense_id = result["value"].as_str().unwrap_or("").to_string();
+            HttpResponse::Created().json(json!({
+                "expense_id": expense_id,
+                "message": "Dépense enregistrée avec succès"
+            }))
+        }
+        Err(e) => {
+            log::error!("Erreur création dépense Convex: {}", e);
+            HttpResponse::InternalServerError().json(ErrorResponse {
+                error: "expense_creation_failed".to_string(),
+                message: format!("Impossible d'enregistrer la dépense: {}", e),
+                status_code: 500,
+            })
+        }
+    }
 }
