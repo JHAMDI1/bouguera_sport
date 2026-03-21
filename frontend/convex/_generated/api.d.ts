@@ -9,11 +9,15 @@
  */
 
 import type * as coaches from "../coaches.js";
+import type * as cron from "../cron.js";
 import type * as dashboard from "../dashboard.js";
 import type * as disciplines from "../disciplines.js";
+import type * as families from "../families.js";
 import type * as members from "../members.js";
 import type * as mutations from "../mutations.js";
 import type * as payments from "../payments.js";
+import type * as seed from "../seed.js";
+import type * as sessions from "../sessions.js";
 import type * as users from "../users.js";
 
 import type {
@@ -24,11 +28,15 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   coaches: typeof coaches;
+  cron: typeof cron;
   dashboard: typeof dashboard;
   disciplines: typeof disciplines;
+  families: typeof families;
   members: typeof members;
   mutations: typeof mutations;
   payments: typeof payments;
+  seed: typeof seed;
+  sessions: typeof sessions;
   users: typeof users;
 }>;
 

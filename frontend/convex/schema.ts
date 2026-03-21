@@ -1,5 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { query, mutation } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 
 export default defineSchema({
   // Table users (SuperAdmin & Coachs)
@@ -21,6 +23,7 @@ export default defineSchema({
     name: v.string(),
     description: v.optional(v.string()),
     monthlyFee: v.number(),
+    color: v.optional(v.string()),
     isActive: v.boolean(),
     createdAt: v.number(),
   })
@@ -135,6 +138,23 @@ export default defineSchema({
     .index("by_memberId", ["memberId"])
     .index("by_groupId", ["groupId"])
     .index("by_date", ["date"]),
+
+  // Table sessions (Planning des cours)
+  sessions: defineTable({
+    groupId: v.id("groups"),
+    coachId: v.id("users"),
+    title: v.string(),
+    startTime: v.number(),
+    endTime: v.number(),
+    dayOfWeek: v.number(),
+    location: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    isRecurring: v.optional(v.boolean()),
+    createdAt: v.number(),
+  })
+    .index("by_groupId", ["groupId"])
+    .index("by_coachId", ["coachId"])
+    .index("by_startTime", ["startTime"]),
 
   // Table auditLog (Journal d'activité)
   auditLog: defineTable({
