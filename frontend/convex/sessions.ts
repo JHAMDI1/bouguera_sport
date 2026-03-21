@@ -3,44 +3,58 @@ import { query, mutation } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 
 export const getSessions = query({
-  args: { 
+  args: {
     groupId: v.optional(v.id("groups")),
     coachId: v.optional(v.id("users")),
     startDate: v.optional(v.number()),
     endDate: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    let sessions = await ctx.db.query("sessions").collect();
+    let sessions;
 
-    if (args.groupId) {
-      sessions = sessions.filter((s) => s.groupId === args.groupId);
+    // Utiliser l'index le plus sélectif disponible
+    if (args.groupId !== undefined) {
+      sessions = await ctx.db
+        .query("sessions")
+        .withIndex("by_groupId", (q) => q.eq("groupId", args.groupId!))
+        .collect();
+      if (args.coachId !== undefined) {
+        sessions = sessions.filter((s) => s.coachId === args.coachId);
+      }
+    } else if (args.coachId !== undefined) {
+      sessions = await ctx.db
+        .query("sessions")
+        .withIndex("by_coachId", (q) => q.eq("coachId", args.coachId!))
+        .collect();
+    } else {
+      // Filtre par plage de dates via index startTime
+      sessions = await ctx.db
+        .query("sessions")
+        .withIndex("by_startTime")
+        .order("desc")
+        .collect();
     }
 
-    if (args.coachId) {
-      sessions = sessions.filter((s) => s.coachId === args.coachId);
-    }
-
+    // Filtrer par dates si spécifié
     if (args.startDate !== undefined) {
       sessions = sessions.filter((s) => s.startTime >= args.startDate!);
     }
-
     if (args.endDate !== undefined) {
       sessions = sessions.filter((s) => s.startTime <= args.endDate!);
     }
 
-    // Enrich with group and coach info
+    // Enrichir avec infos groupe, coach, discipline
     const enrichedSessions = await Promise.all(
       sessions.map(async (session) => {
         const group = session.groupId ? await ctx.db.get(session.groupId) : null;
         const coach = session.coachId ? await ctx.db.get(session.coachId) : null;
         const discipline = group?.disciplineId ? await ctx.db.get(group.disciplineId) : null;
-        
         return {
           ...session,
-          groupName: group?.name || null,
-          coachName: coach?.fullName || null,
-          disciplineName: discipline?.name || null,
-          color: discipline?.color || "#4F46E5",
+          groupName: group?.name ?? null,
+          coachName: coach?.fullName ?? null,
+          disciplineName: discipline?.name ?? null,
+          color: discipline?.color ?? "#4F46E5",
         };
       })
     );
@@ -95,10 +109,9 @@ export const createSession = mutation({
       createdAt: Date.now(),
     });
 
-    // Log audit
+    // Audit log (sans userId car création via interface — ajouter createdBy si besoin)
     await ctx.db.insert("auditLog", {
-      userId: "system" as Id<"users">,
-      action: "CREATE_SESSION",
+      action: "SESSION_CREATED",
       entityType: "session",
       entityId: sessionId,
       details: JSON.stringify({ title: args.title, groupId: args.groupId }),
@@ -124,13 +137,12 @@ export const updateSession = mutation({
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;
-    
+
     await ctx.db.patch(id, updates);
 
-    // Log audit
+    // Audit log
     await ctx.db.insert("auditLog", {
-      userId: "system" as Id<"users">,
-      action: "UPDATE_SESSION",
+      action: "SESSION_UPDATED",
       entityType: "session",
       entityId: id,
       details: JSON.stringify(updates),
@@ -146,10 +158,9 @@ export const deleteSession = mutation({
   handler: async (ctx, args) => {
     await ctx.db.delete(args.id);
 
-    // Log audit
+    // Audit log
     await ctx.db.insert("auditLog", {
-      userId: "system" as Id<"users">,
-      action: "DELETE_SESSION",
+      action: "SESSION_DELETED",
       entityType: "session",
       entityId: args.id,
       details: "",
@@ -167,11 +178,13 @@ export const getWeeklySchedule = query({
   },
   handler: async (ctx, args) => {
     const weekEnd = args.weekStart + 7 * 24 * 60 * 60 * 1000;
-    
+
+    // Utiliser l'index by_startTime avec une plage de dates
     const sessions = await ctx.db
       .query("sessions")
-      .filter((q) => q.gte(q.field("startTime"), args.weekStart))
-      .filter((q) => q.lte(q.field("startTime"), weekEnd))
+      .withIndex("by_startTime", (q) =>
+        q.gte("startTime", args.weekStart).lte("startTime", weekEnd)
+      )
       .collect();
 
     // Enrich with group and coach info
@@ -180,7 +193,7 @@ export const getWeeklySchedule = query({
         const group = session.groupId ? await ctx.db.get(session.groupId) : null;
         const coach = session.coachId ? await ctx.db.get(session.coachId) : null;
         const discipline = group?.disciplineId ? await ctx.db.get(group.disciplineId) : null;
-        
+
         return {
           ...session,
           groupName: group?.name || null,
