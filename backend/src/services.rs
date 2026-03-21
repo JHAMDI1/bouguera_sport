@@ -1,11 +1,13 @@
 use chrono::Utc;
-use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
+use jsonwebtoken::{decode, decode_header, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 use actix_web::web;
-use reqwest;
+use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
 
 use crate::config::Config;
 use crate::models::{ReceiptData, User};
+
+// ─── Claims JWT internes ──────────────────────────────────────────────────────
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
@@ -16,6 +18,8 @@ pub struct Claims {
     pub iat: usize,
 }
 
+// ─── Données utilisateur Clerk retournées après vérification ─────────────────
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ClerkUserData {
     pub clerk_id: String,
@@ -23,7 +27,9 @@ pub struct ClerkUserData {
     pub full_name: String,
 }
 
-/// Réponse de l'API Clerk pour /oauth/userinfo
+// ─── Structs pour le parsing des réponses Clerk ───────────────────────────────
+
+/// Réponse de /oauth/userinfo
 #[derive(Debug, Deserialize)]
 struct ClerkUserInfoResponse {
     sub: String,
@@ -33,14 +39,24 @@ struct ClerkUserInfoResponse {
     family_name: Option<String>,
 }
 
-/// Réponse de l'API Clerk pour /v1/tokens/verify
-#[allow(dead_code)]
-#[derive(Debug, Deserialize)]
-struct ClerkTokenVerifyResponse {
-    user_id: Option<String>,
-    sub: Option<String>,
-    email: Option<String>,
+/// Clé individuelle dans la réponse JWKS
+#[derive(Debug, Deserialize, Clone)]
+struct JwksKey {
+    #[serde(rename = "kty")]
+    key_type: String,
+    #[serde(rename = "kid")]
+    key_id: Option<String>,
+    n: Option<String>, // RSA modulus (base64url)
+    e: Option<String>, // RSA exponent (base64url)
 }
+
+/// Réponse complète du endpoint JWKS
+#[derive(Debug, Deserialize)]
+struct JwksResponse {
+    keys: Vec<JwksKey>,
+}
+
+// ─── JWT interne ──────────────────────────────────────────────────────────────
 
 pub fn generate_jwt(user: &User, secret: &str) -> Result<String, jsonwebtoken::errors::Error> {
     let now = Utc::now();
@@ -62,7 +78,6 @@ pub fn generate_jwt(user: &User, secret: &str) -> Result<String, jsonwebtoken::e
     )
 }
 
-#[allow(unused)]
 pub fn verify_jwt(token: &str, secret: &str) -> Result<Claims, jsonwebtoken::errors::Error> {
     let validation = Validation::new(Algorithm::HS256);
     let token_data = decode::<Claims>(
@@ -73,12 +88,13 @@ pub fn verify_jwt(token: &str, secret: &str) -> Result<Claims, jsonwebtoken::err
     Ok(token_data.claims)
 }
 
-/// Vérifie un token de session Clerk contre l'API Clerk.
+// ─── Vérification Clerk ───────────────────────────────────────────────────────
+
+/// Vérifie un token de session Clerk.
 ///
-/// Stratégie :
-/// 1. Appel à GET https://api.clerk.com/oauth/userinfo avec le token en Bearer
-///    → retourne les infos utilisateur si le token est valide
-/// 2. En cas d'échec, retourne une erreur explicite
+/// Stratégie (du plus sécurisé au plus simple) :
+/// 1. JWKS : valide la signature JWT via les clés publiques Clerk (local, rapide)
+/// 2. Fallback REST : GET /oauth/userinfo si JWKS non configuré ou indisponible
 pub async fn verify_clerk_token(
     token: &str,
     config: web::Data<Config>,
@@ -87,17 +103,113 @@ pub async fn verify_clerk_token(
         return Err("Token Clerk manquant".to_string());
     }
 
+    // Méthode 1 : JWKS (locale, rapide, sécurisée)
+    if !config.clerk_jwks_url.is_empty() {
+        match verify_via_jwks(token, &config).await {
+            Ok(user_data) => return Ok(user_data),
+            Err(e) => log::warn!("Vérification JWKS échouée ({}), fallback REST API", e),
+        }
+    }
+
+    // Méthode 2 : REST API Clerk (fallback)
+    verify_via_rest_api(token, &config).await
+}
+
+/// Vérifie le token en validant sa signature via les clés publiques JWKS de Clerk
+async fn verify_via_jwks(token: &str, config: &Config) -> Result<ClerkUserData, String> {
+    // Récupérer le kid du header JWT
+    let header = decode_header(token)
+        .map_err(|e| format!("Header JWT invalide: {}", e))?;
+    let kid = header.kid.unwrap_or_default();
+
+    // Télécharger les clés JWKS
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(10))
         .build()
-        .map_err(|e| format!("Erreur création client HTTP: {}", e))?;
+        .map_err(|e| format!("Erreur client HTTP: {}", e))?;
 
-    // Étape 1 : Utiliser /oauth/userinfo avec le session token
-    let userinfo_url = "https://api.clerk.com/oauth/userinfo";
+    let jwks: JwksResponse = client
+        .get(&config.clerk_jwks_url)
+        .send()
+        .await
+        .map_err(|e| format!("Impossible de télécharger JWKS: {}", e))?
+        .json()
+        .await
+        .map_err(|e| format!("Erreur parsing JWKS: {}", e))?;
+
+    // Trouver la clé RSA correspondante au kid
+    let key = jwks
+        .keys
+        .iter()
+        .find(|k| {
+            k.key_type == "RSA"
+                && (kid.is_empty() || k.key_id.as_deref().unwrap_or("") == kid)
+        })
+        .ok_or_else(|| format!("Clé JWKS RSA non trouvée pour kid='{}'", kid))?;
+
+    let n_b64 = key.n.as_deref().ok_or("Modulus RSA manquant dans JWKS")?;
+    let e_b64 = key.e.as_deref().ok_or("Exposant RSA manquant dans JWKS")?;
+
+    let n_bytes = URL_SAFE_NO_PAD
+        .decode(n_b64)
+        .map_err(|e| format!("Décodage modulus RSA: {}", e))?;
+    let e_bytes = URL_SAFE_NO_PAD
+        .decode(e_b64)
+        .map_err(|e| format!("Décodage exposant RSA: {}", e))?;
+
+    let decoding_key = DecodingKey::from_rsa_raw_components(&n_bytes, &e_bytes);
+
+    // Valider le JWT (signature + expiration + issuer)
+    let mut validation = Validation::new(Algorithm::RS256);
+    if !config.clerk_issuer.is_empty() {
+        validation.set_issuer(&[&config.clerk_issuer]);
+    }
+    validation.validate_exp = true;
+
+    let token_data = decode::<serde_json::Value>(token, &decoding_key, &validation)
+        .map_err(|e| format!("Signature JWT Clerk invalide: {}", e))?;
+
+    let claims = &token_data.claims;
+
+    let clerk_id = claims["sub"]
+        .as_str()
+        .ok_or("Claim 'sub' manquant")?
+        .to_string();
+
+    let email = claims["email"].as_str().unwrap_or("").to_string();
+
+    let full_name = {
+        let name = claims["name"].as_str();
+        let first = claims["given_name"].as_str().unwrap_or("");
+        let last = claims["family_name"].as_str().unwrap_or("");
+        name.map(|s| s.to_string())
+            .or_else(|| {
+                if first.is_empty() && last.is_empty() {
+                    None
+                } else {
+                    Some(format!("{} {}", first, last).trim().to_string())
+                }
+            })
+            .unwrap_or_else(|| "Utilisateur".to_string())
+    };
+
+    Ok(ClerkUserData {
+        clerk_id,
+        email,
+        full_name,
+    })
+}
+
+/// Fallback : vérifie en appelant l'API REST Clerk (appel externe par requête)
+async fn verify_via_rest_api(token: &str, _config: &Config) -> Result<ClerkUserData, String> {
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(10))
+        .build()
+        .map_err(|e| format!("Erreur client HTTP: {}", e))?;
+
     let response = client
-        .get(userinfo_url)
+        .get("https://api.clerk.com/oauth/userinfo")
         .header("Authorization", format!("Bearer {}", token))
-        .header("Content-Type", "application/json")
         .send()
         .await
         .map_err(|e| format!("Erreur appel Clerk API: {}", e))?;
@@ -108,7 +220,8 @@ pub async fn verify_clerk_token(
             .await
             .map_err(|e| format!("Erreur parsing réponse Clerk: {}", e))?;
 
-        let full_name = user_info.name
+        let full_name = user_info
+            .name
             .or_else(|| {
                 match (user_info.given_name, user_info.family_name) {
                     (Some(g), Some(f)) => Some(format!("{} {}", g, f)),
@@ -126,45 +239,13 @@ pub async fn verify_clerk_token(
         });
     }
 
-    let status = response.status();
-
-    // Étape 2 : Si /oauth/userinfo échoue, essayer via le secret key
-    // Cette méthode utilise l'API Clerk backend avec CLERK_SECRET_KEY
-    if !config.clerk_secret_key.is_empty() {
-        let verify_url = "https://api.clerk.com/v1/tokens/verify";
-        let backend_response = client
-            .post(verify_url)
-            .header("Authorization", format!("Bearer {}", config.clerk_secret_key))
-            .header("Content-Type", "application/x-www-form-urlencoded")
-            .body(format!("token={}", token))
-            .send()
-            .await
-            .map_err(|e| format!("Erreur vérification backend Clerk: {}", e))?;
-
-        if backend_response.status().is_success() {
-            let verify_data: ClerkTokenVerifyResponse = backend_response
-                .json()
-                .await
-                .map_err(|e| format!("Erreur parsing vérification Clerk: {}", e))?;
-
-            let user_id = verify_data.user_id
-                .or(verify_data.sub)
-                .ok_or_else(|| "user_id manquant dans la réponse Clerk".to_string())?;
-
-            return Ok(ClerkUserData {
-                clerk_id: user_id,
-                email: verify_data.email.unwrap_or_default(),
-                full_name: "Utilisateur Clerk".to_string(),
-            });
-        }
-    }
-
-    // Les deux méthodes ont échoué
     Err(format!(
-        "Token Clerk invalide ou expiré (HTTP {}). Assurez-vous d'envoyer un session token valide.",
-        status
+        "Token Clerk invalide ou expiré (HTTP {})",
+        response.status()
     ))
 }
+
+// ─── Numéro de reçu ───────────────────────────────────────────────────────────
 
 pub fn generate_receipt_number() -> String {
     let timestamp = Utc::now().timestamp();
@@ -172,17 +253,11 @@ pub fn generate_receipt_number() -> String {
     format!("REC-{}-{:04}", timestamp, random_suffix)
 }
 
+// ─── Génération PDF reçu ──────────────────────────────────────────────────────
+
 pub fn generate_receipt_pdf(receipt_data: &ReceiptData) -> Result<Vec<u8>, String> {
-    // In production, use a PDF generation library like printpdf or genpdf
-    // For now, return mock PDF bytes
-    // This would generate a professional receipt with:
-    // - Club logo
-    // - Receipt number
-    // - Member details
-    // - Payment details
-    // - Authorized signature
-    // - QR code for verification
-    
+    // TODO P0.4: Implémenter avec printpdf ou genpdf
+    // Pour l'instant format minimal valide
     let mock_pdf = format!(
         "%PDF-1.4\nReceipt: {}\nMember: {}\nAmount: {:.3} TND\nDate: {}\nPaid by: {}\n%%EOF",
         receipt_data.receipt_number,
@@ -191,11 +266,13 @@ pub fn generate_receipt_pdf(receipt_data: &ReceiptData) -> Result<Vec<u8>, Strin
         receipt_data.payment_date,
         receipt_data.received_by
     );
-    
+
     Ok(mock_pdf.into_bytes())
 }
 
-// Convex API client configuration
+// ─── Client Convex ────────────────────────────────────────────────────────────
+
+/// Client HTTP vers l'API HTTP Convex
 pub struct ConvexClient {
     base_url: String,
     api_key: String,
@@ -208,7 +285,7 @@ impl ConvexClient {
             .timeout(std::time::Duration::from_secs(30))
             .build()
             .expect("Failed to create HTTP client");
-        
+
         Self {
             base_url,
             api_key,
@@ -222,7 +299,7 @@ impl ConvexClient {
         args: serde_json::Value,
     ) -> Result<serde_json::Value, String> {
         let url = format!("{}/api/query", self.base_url);
-        
+
         let payload = serde_json::json!({
             "path": query_name,
             "args": args,
@@ -258,7 +335,7 @@ impl ConvexClient {
         args: serde_json::Value,
     ) -> Result<serde_json::Value, String> {
         let url = format!("{}/api/mutation", self.base_url);
-        
+
         let payload = serde_json::json!({
             "path": mutation_name,
             "args": args,
@@ -287,45 +364,10 @@ impl ConvexClient {
 
         Ok(result)
     }
-
-    pub async fn action(
-        &self,
-        action_name: &str,
-        args: serde_json::Value,
-    ) -> Result<serde_json::Value, String> {
-        let url = format!("{}/api/action", self.base_url);
-        
-        let payload = serde_json::json!({
-            "path": action_name,
-            "args": args,
-        });
-
-        let response = self
-            .client
-            .post(&url)
-            .header("Authorization", format!("Bearer {}", self.api_key))
-            .header("Content-Type", "application/json")
-            .json(&payload)
-            .send()
-            .await
-            .map_err(|e| format!("Convex action failed: {}", e))?;
-
-        if !response.status().is_success() {
-            let status = response.status();
-            let error_text = response.text().await.unwrap_or_default();
-            return Err(format!("Convex API error ({}): {}", status, error_text));
-        }
-
-        let result: serde_json::Value = response
-            .json()
-            .await
-            .map_err(|e| format!("Failed to parse Convex response: {}", e))?;
-
-        Ok(result)
-    }
 }
 
-// Global client instance (initialized once)
+// ─── Singleton Convex ─────────────────────────────────────────────────────────
+
 use std::sync::OnceLock;
 
 static CONVEX_CLIENT: OnceLock<ConvexClient> = OnceLock::new();

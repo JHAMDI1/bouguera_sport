@@ -10,6 +10,10 @@ pub struct Config {
     pub convex_key: String,
     /// Clerk Secret Key (sk_test_... or sk_live_...) — used to call Clerk REST API
     pub clerk_secret_key: String,
+    /// Clerk JWKS URL — used to verify session tokens locally via public keys
+    pub clerk_jwks_url: String,
+    /// Clerk Issuer — used to validate the `iss` claim in JWTs
+    pub clerk_issuer: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -42,6 +46,10 @@ impl Config {
                 .unwrap_or_else(|_| "https://your-deployment.convex.cloud".to_string()),
             convex_key: std::env::var("CONVEX_KEY").unwrap_or_else(|_| "".to_string()),
             clerk_secret_key: std::env::var("CLERK_SECRET_KEY")
+                .unwrap_or_else(|_| "".to_string()),
+            clerk_jwks_url: std::env::var("CLERK_JWKS_URL")
+                .unwrap_or_else(|_| "".to_string()),
+            clerk_issuer: std::env::var("CLERK_ISSUER")
                 .unwrap_or_else(|_| "".to_string()),
         }
     }
