@@ -326,6 +326,7 @@ dependencies = [
  "actix-cors",
  "actix-web",
  "argon2",
+ "base64",
  "chrono",
  "dotenv",
  "env_logger",
