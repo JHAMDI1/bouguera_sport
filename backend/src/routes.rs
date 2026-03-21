@@ -19,11 +19,11 @@ pub fn app_routes(cfg: &mut web::ServiceConfig) {
                 "endpoints": [
                     "GET  /api/health",
                     "POST /api/auth",
-                    "POST /api/payments",
-                    "POST /api/payments/{id}/cancel",
-                    "GET  /api/receipts/{number}/pdf",
-                    "GET  /api/dashboard/stats",
-                    "POST /api/expenses"
+                    "POST /api/protected/payments        (JWT + Cashier role required)",
+                    "POST /api/protected/payments/{id}/cancel  (JWT + Cashier role required)",
+                    "GET  /api/protected/receipts/{number}/pdf (JWT required)",
+                    "GET  /api/protected/dashboard/stats       (JWT + Coach role required)",
+                    "POST /api/protected/expenses              (JWT + Admin role required)"
                 ]
             }))
         }),
@@ -33,11 +33,11 @@ pub fn app_routes(cfg: &mut web::ServiceConfig) {
         web::scope("/api")
             // Health check (public)
             .route("/health", web::get().to(health_check))
-            
+
             // Authentication (public)
             .route("/auth", web::post().to(auth))
-            
-            // Protected routes with JWT
+
+            // All business routes are protected — JWT required
             .service(
                 web::scope("/protected")
                     .wrap(JwtAuth)
@@ -62,12 +62,6 @@ pub fn app_routes(cfg: &mut web::ServiceConfig) {
                             .wrap(RequireRole::new(UserRole::Admin))
                             .route("", web::post().to(create_expense))
                     )
-            )
-            // Legacy routes (backward compatibility, will be removed)
-            .route("/payments", web::post().to(create_payment))
-            .route("/payments/{id}/cancel", web::post().to(cancel_payment))
-            .route("/receipts/{receipt_number}/pdf", web::get().to(generate_receipt))
-            .route("/dashboard/stats", web::get().to(get_dashboard_stats))
-            .route("/expenses", web::post().to(create_expense)),
+            ),
     );
 }
