@@ -3,6 +3,37 @@ import { query } from "./_generated/server";
 
 // ─── Membres ──────────────────────────────────────────────────────────────────
 
+import { paginationOptsValidator } from "convex/server";
+
+export const getMembersPaginated = query({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    familyId: v.optional(v.id("families")),
+    isActive: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    // Si filtrage par famille
+    if (args.familyId !== undefined) {
+      return await ctx.db
+        .query("members")
+        .withIndex("by_familyId", (q) => q.eq("familyId", args.familyId!))
+        .paginate(args.paginationOpts);
+    }
+
+    // Si filtrage par statut actif
+    if (args.isActive !== undefined) {
+      return await ctx.db
+        .query("members")
+        .withIndex("by_isActive", (q) => q.eq("isActive", args.isActive!))
+        .paginate(args.paginationOpts);
+    }
+
+    // Sans filtre spécifique
+    return await ctx.db.query("members").paginate(args.paginationOpts);
+  },
+});
+
+
 export const getMembers = query({
   args: {
     familyId: v.optional(v.id("families")),

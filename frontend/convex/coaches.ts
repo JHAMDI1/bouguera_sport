@@ -160,6 +160,10 @@ export const createExpense = mutation({
     recordedBy: v.id("users"),
   },
   handler: async (ctx, args) => {
+    // Validation métier
+    if (args.amount <= 0) throw new Error("Le montant de la dépense doit être supérieur à 0");
+    if (args.description.trim().length === 0) throw new Error("La description de la dépense est requise");
+
     const expenseId = await ctx.db.insert("expenses", {
       ...args,
       createdAt: Date.now(),

@@ -21,6 +21,15 @@ export const createMember = mutation({
   handler: async (ctx, args) => {
     const { createdBy, ...memberData } = args;
 
+    // Validation métier
+    if (args.firstName.trim().length < 2) throw new Error("Le prénom doit contenir au moins 2 caractères");
+    if (args.lastName.trim().length < 2) throw new Error("Le nom de famille doit contenir au moins 2 caractères");
+
+    // Si un téléphone est fourni, vérifier un format basique (optionnel mais recommandé)
+    if (args.phone && args.phone.trim().length < 8) {
+      throw new Error("Le numéro de téléphone semble invalide");
+    }
+
     const memberId = await ctx.db.insert("members", {
       ...memberData,
       registrationDate: Date.now(),
@@ -95,6 +104,12 @@ export const createPayment = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // Validation métier
+    if (args.amount <= 0) throw new Error("Le montant du paiement doit être supérieur à 0");
+    if (args.monthCovered < 1 || args.monthCovered > 12) throw new Error("Le mois doit être compris entre 1 et 12");
+    if (args.yearCovered < 2000 || args.yearCovered > 2100) throw new Error("L'année est invalide");
+    if (!args.memberId && !args.familyId) throw new Error("Un paiement doit être rattaché à un membre ou une famille");
+
     const paymentId = await ctx.db.insert("payments", {
       ...args,
       paymentMethod: args.paymentMethod ?? "cash",

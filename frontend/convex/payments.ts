@@ -3,6 +3,32 @@ import { query, mutation } from "./_generated/server";
 
 // ─── Queries Paiements ────────────────────────────────────────────────────────
 
+import { paginationOptsValidator } from "convex/server";
+
+export const getPaymentsPaginated = query({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    memberId: v.optional(v.id("members")),
+    familyId: v.optional(v.id("families")),
+  },
+  handler: async (ctx, args) => {
+    if (args.memberId !== undefined) {
+      return await ctx.db
+        .query("payments")
+        .withIndex("by_memberId", (q) => q.eq("memberId", args.memberId!))
+        .paginate(args.paginationOpts);
+    }
+    if (args.familyId !== undefined) {
+      return await ctx.db
+        .query("payments")
+        .withIndex("by_familyId", (q) => q.eq("familyId", args.familyId!))
+        .paginate(args.paginationOpts);
+    }
+    return await ctx.db.query("payments").order("desc").paginate(args.paginationOpts);
+  },
+});
+
+
 export const getPayments = query({
   args: {
     memberId: v.optional(v.id("members")),
@@ -132,7 +158,28 @@ export const cancelPayment = mutation({
   },
 });
 
-// ─── Queries Dépenses ─────────────────────────────────────────────────────────
+// ─── Dépenses ──────────────────────────────────────────────────────────────────
+
+export const getExpensesPaginated = query({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    categoryId: v.optional(v.id("expenseCategories")),
+  },
+  handler: async (ctx, args) => {
+    if (args.categoryId !== undefined) {
+      return await ctx.db
+        .query("expenses")
+        .withIndex("by_categoryId", (q) => q.eq("categoryId", args.categoryId!))
+        .paginate(args.paginationOpts);
+    }
+    return await ctx.db
+      .query("expenses")
+      .withIndex("by_expenseDate")
+      .order("desc")
+      .paginate(args.paginationOpts);
+  },
+});
+
 
 export const getExpenses = query({
   args: {
