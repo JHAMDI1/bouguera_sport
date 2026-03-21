@@ -95,18 +95,30 @@ export const createFamily = mutation({
     primaryContactName: v.string(),
     primaryContactPhone: v.optional(v.string()),
     discountPercentage: v.optional(v.number()),
+    createdBy: v.optional(v.id("users")),
   },
   returns: v.id("families"),
   handler: async (ctx, args) => {
+    const { createdBy, ...familyData } = args;
     const now = Date.now();
-    return await ctx.db.insert("families", {
-      familyName: args.familyName,
-      primaryContactName: args.primaryContactName,
-      primaryContactPhone: args.primaryContactPhone,
-      discountPercentage: args.discountPercentage,
+    const familyId = await ctx.db.insert("families", {
+      ...familyData,
       isActive: true,
       createdAt: now,
     });
+
+    if (createdBy) {
+      await ctx.db.insert("auditLog", {
+        userId: createdBy,
+        action: "FAMILY_CREATED",
+        entityType: "family",
+        entityId: familyId,
+        details: `Famille créée: ${args.familyName}`,
+        createdAt: now,
+      });
+    }
+
+    return familyId;
   },
 });
 
@@ -119,9 +131,21 @@ export const updateFamily = mutation({
     primaryContactPhone: v.optional(v.string()),
     discountPercentage: v.optional(v.number()),
     isActive: v.boolean(),
+    updatedBy: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
-    const { id, ...updates } = args;
+    const { id, updatedBy, ...updates } = args;
     await ctx.db.patch(id, updates);
+
+    if (updatedBy) {
+      await ctx.db.insert("auditLog", {
+        userId: updatedBy,
+        action: "FAMILY_UPDATED",
+        entityType: "family",
+        entityId: id,
+        details: `Famille mise à jour: ${args.familyName}`,
+        createdAt: Date.now(),
+      });
+    }
   },
 });

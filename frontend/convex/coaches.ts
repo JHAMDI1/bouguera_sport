@@ -7,14 +7,27 @@ export const createCoach = mutation({
     email: v.string(),
     fullName: v.string(),
     phone: v.optional(v.string()),
+    createdBy: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
+    const { createdBy, ...coachData } = args;
     const coachId = await ctx.db.insert("users", {
-      ...args,
+      ...coachData,
       role: "coach",
       isActive: true,
       createdAt: Date.now(),
     });
+
+    if (createdBy) {
+      await ctx.db.insert("auditLog", {
+        userId: createdBy,
+        action: "COACH_CREATED",
+        entityType: "user",
+        entityId: coachId,
+        details: `Coach créé: ${args.fullName} (${args.email})`,
+        createdAt: Date.now(),
+      });
+    }
     return coachId;
   },
 });
@@ -25,10 +38,22 @@ export const updateCoach = mutation({
     fullName: v.optional(v.string()),
     phone: v.optional(v.string()),
     isActive: v.optional(v.boolean()),
+    updatedBy: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
-    const { id, ...updates } = args;
+    const { id, updatedBy, ...updates } = args;
     await ctx.db.patch(id, updates);
+
+    if (updatedBy) {
+      await ctx.db.insert("auditLog", {
+        userId: updatedBy,
+        action: "COACH_UPDATED",
+        entityType: "user",
+        entityId: id,
+        details: `Coach mis à jour: champs ${Object.keys(updates).join(", ")}`,
+        createdAt: Date.now(),
+      });
+    }
     return id;
   },
 });
@@ -38,13 +63,26 @@ export const createDiscipline = mutation({
     name: v.string(),
     description: v.optional(v.string()),
     monthlyFee: v.number(),
+    createdBy: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
+    const { createdBy, ...disciplineData } = args;
     const disciplineId = await ctx.db.insert("disciplines", {
-      ...args,
+      ...disciplineData,
       isActive: true,
       createdAt: Date.now(),
     });
+
+    if (createdBy) {
+      await ctx.db.insert("auditLog", {
+        userId: createdBy,
+        action: "DISCIPLINE_CREATED",
+        entityType: "discipline",
+        entityId: disciplineId,
+        details: `Discipline créée: ${args.name} (${args.monthlyFee} TND/mois)`,
+        createdAt: Date.now(),
+      });
+    }
     return disciplineId;
   },
 });
@@ -71,13 +109,26 @@ export const createGroup = mutation({
     coachId: v.id("users"),
     schedule: v.optional(v.string()),
     maxCapacity: v.number(),
+    createdBy: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
+    const { createdBy, ...groupData } = args;
     const groupId = await ctx.db.insert("groups", {
-      ...args,
+      ...groupData,
       isActive: true,
       createdAt: Date.now(),
     });
+
+    if (createdBy) {
+      await ctx.db.insert("auditLog", {
+        userId: createdBy,
+        action: "GROUP_CREATED",
+        entityType: "group",
+        entityId: groupId,
+        details: `Groupe créé: ${args.name}`,
+        createdAt: Date.now(),
+      });
+    }
     return groupId;
   },
 });
@@ -113,6 +164,16 @@ export const createExpense = mutation({
       ...args,
       createdAt: Date.now(),
     });
+
+    await ctx.db.insert("auditLog", {
+      userId: args.recordedBy,
+      action: "EXPENSE_CREATED",
+      entityType: "expense",
+      entityId: expenseId,
+      details: `Dépense enregistrée: ${args.description} - ${args.amount} TND`,
+      createdAt: Date.now(),
+    });
+
     return expenseId;
   },
 });
