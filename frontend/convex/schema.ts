@@ -163,7 +163,7 @@ export default defineSchema({
 
   // Table auditLog (Journal d'activité)
   auditLog: defineTable({
-    userId: v.optional(v.id("users")), // optionnel pour les actions système (cron jobs)
+    userId: v.optional(v.union(v.id("users"), v.literal("system"))), // optionnel pour les actions système (cron jobs)
     action: v.string(),
     entityType: v.string(),
     entityId: v.string(),

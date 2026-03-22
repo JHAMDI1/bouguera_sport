@@ -10,6 +10,7 @@
 
 import type * as coaches from "../coaches.js";
 import type * as cron from "../cron.js";
+import type * as crons from "../crons.js";
 import type * as dashboard from "../dashboard.js";
 import type * as disciplines from "../disciplines.js";
 import type * as families from "../families.js";
@@ -29,6 +30,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   coaches: typeof coaches;
   cron: typeof cron;
+  crons: typeof crons;
   dashboard: typeof dashboard;
   disciplines: typeof disciplines;
   families: typeof families;

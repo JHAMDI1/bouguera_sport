@@ -59,6 +59,7 @@ export const updateMember = mutation({
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),
     phone: v.optional(v.string()),
+    gender: v.optional(v.union(v.literal("male"), v.literal("female"), v.literal("other"))),
     emergencyContactName: v.optional(v.string()),
     emergencyContactPhone: v.optional(v.string()),
     medicalCertificateExpiry: v.optional(v.number()),
