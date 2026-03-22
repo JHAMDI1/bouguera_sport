@@ -25,7 +25,8 @@
   --primary-200: #eeff99;
   --primary-300: #e5ff65;
   --primary-400: #dbff33;
-  --primary-500: #d0ff00; /* THE Volt */
+  --primary-500: #d0ff00;
+  /* THE Volt */
   --primary-600: #bce500;
   --primary-700: #8fb300;
   --primary-800: #6b8500;
@@ -38,7 +39,8 @@
   --secondary-200: #ffc4ba;
   --secondary-300: #ff9b8c;
   --secondary-400: #ff6852;
-  --secondary-500: #ff3300; /* Alert Orange/Red */
+  --secondary-500: #ff3300;
+  /* Alert Orange/Red */
   --secondary-600: #e52e00;
   --secondary-700: #b32400;
   --secondary-800: #8e1c00;
@@ -62,30 +64,32 @@
   --background-secondary: #ffffff;
   --background-tertiary: var(--gray-100);
   --background-elevated: #ffffff;
-  
+
   --foreground: var(--gray-950);
   --foreground-secondary: var(--gray-700);
   --foreground-tertiary: var(--gray-600);
   --foreground-muted: var(--gray-500);
-  
-  --border: var(--gray-950); /* Stark borders for brutalism */
+
+  --border: var(--gray-950);
+  /* Stark borders for brutalism */
   --border-subtle: var(--gray-300);
   --border-strong: var(--gray-950);
-  
+
   /* Buttons and accents */
   --primary: var(--primary-500);
   --primary-hover: var(--primary-400);
   --primary-active: var(--primary-600);
   --primary-subtle: #ffffff;
   --primary-subtle-hover: var(--primary-100);
+  --primary-text: var(--primary-800);
   --on-primary: #000000;
-  
+
   --secondary: var(--secondary-500);
   --secondary-hover: var(--secondary-400);
   --secondary-active: var(--secondary-600);
   --secondary-subtle: #ffffff;
   --on-secondary: #ffffff;
-  
+
   --success: var(--success-500);
   --success-subtle: #ffffff;
   --on-success: #000000;
@@ -98,7 +102,7 @@
   --info: var(--info-500);
   --info-subtle: #ffffff;
   --on-info: #000000;
-  
+
   /* Sports Disciplines - High sat colors */
   --discipline-taekwondo: #ff1a1a;
   --discipline-kungfu: #ffaa00;
@@ -106,7 +110,7 @@
   --discipline-boxe: #0033ff;
   --discipline-yoga: #00ff66;
   --discipline-fitness: #00e5ff;
-  
+
   /* Hard Industrial Shadows */
   --shadow-xs: 2px 2px 0px 0px var(--border);
   --shadow-sm: 4px 4px 0px 0px var(--border);
@@ -114,7 +118,7 @@
   --shadow-lg: 8px 8px 0px 0px var(--border);
   --shadow-xl: 12px 12px 0px 0px var(--border);
   --shadow-inner: inset 2px 2px 0px 0px var(--border);
-  
+
   /* Sharp Edges */
   --radius-none: 0px;
   --radius-xs: 0px;
@@ -124,12 +128,13 @@
   --radius-xl: 0px;
   --radius-2xl: 0px;
   --radius-3xl: 0px;
-  --radius-full: 9999px; /* Only for pills/badges when strictly needed */
-  
+  --radius-full: 9999px;
+  /* Only for pills/badges when strictly needed */
+
   /* Typography Variables */
   --font-sans-main: var(--font-sans), system-ui, sans-serif;
   --font-display-main: var(--font-display), IMPACT, sans-serif;
-  
+
   --transition-fast: 100ms cubic-bezier(0, 0, 0.2, 1);
   --transition-base: 150ms cubic-bezier(0, 0, 0.2, 1);
   --transition-slow: 200ms cubic-bezier(0, 0, 0.2, 1);
@@ -144,42 +149,44 @@
     --background-secondary: var(--gray-900);
     --background-tertiary: var(--gray-800);
     --background-elevated: var(--gray-900);
-    
+
     --foreground: #ffffff;
     --foreground-secondary: var(--gray-100);
     --foreground-tertiary: var(--gray-300);
     --foreground-muted: var(--gray-400);
-    
+
     --border: var(--gray-700);
     --border-subtle: var(--gray-800);
     --border-strong: var(--gray-600);
-    
+
     /* Volt pops immensely on black */
     --primary: var(--primary-500);
     --primary-hover: var(--primary-400);
     --primary-active: var(--primary-600);
     --primary-subtle: var(--gray-900);
     --primary-subtle-hover: var(--gray-800);
+    --primary-text: var(--primary-500);
     --on-primary: #000000;
-    
+
     --secondary: var(--secondary-500);
     --secondary-hover: var(--secondary-400);
     --secondary-active: var(--secondary-600);
     --secondary-subtle: var(--gray-900);
-    --on-secondary: #000000; /* better contrast on bright orange */
+    --on-secondary: #000000;
+    /* better contrast on bright orange */
 
     --success: var(--success-500);
     --success-subtle: var(--gray-900);
     --on-success: #000000;
-    
+
     --error: var(--error-500);
     --error-subtle: var(--gray-900);
     --on-error: #ffffff;
-    
+
     --warning: var(--warning-500);
     --warning-subtle: var(--gray-900);
     --on-warning: #000000;
-    
+
     --info: var(--info-500);
     --info-subtle: var(--gray-900);
     --on-info: #000000;
@@ -197,57 +204,58 @@
 /* ============================================
    TAILWIND THEME CONFIGURATION
    ============================================ */
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-background-secondary: var(--background-secondary);
   --color-background-tertiary: var(--background-tertiary);
   --color-background-elevated: var(--background-elevated);
-  
+
   --color-foreground: var(--foreground);
   --color-foreground-secondary: var(--foreground-secondary);
   --color-foreground-tertiary: var(--foreground-tertiary);
   --color-foreground-muted: var(--foreground-muted);
-  
+
   --color-border: var(--border);
   --color-border-subtle: var(--border-subtle);
   --color-border-strong: var(--border-strong);
-  
+
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-active: var(--primary-active);
   --color-primary-subtle: var(--primary-subtle);
   --color-primary-subtle-hover: var(--primary-subtle-hover);
+  --color-primary-text: var(--primary-text);
   --color-on-primary: var(--on-primary);
-  
+
   --color-secondary: var(--secondary);
   --color-secondary-hover: var(--secondary-hover);
   --color-secondary-active: var(--secondary-active);
   --color-secondary-subtle: var(--secondary-subtle);
   --color-on-secondary: var(--on-secondary);
-  
+
   --color-success: var(--success);
   --color-success-subtle: var(--success-subtle);
   --color-on-success: var(--on-success);
-  
+
   --color-error: var(--error);
   --color-error-subtle: var(--error-subtle);
   --color-on-error: var(--on-error);
-  
+
   --color-warning: var(--warning);
   --color-warning-subtle: var(--warning-subtle);
   --color-on-warning: var(--on-warning);
-  
+
   --color-info: var(--info);
   --color-info-subtle: var(--info-subtle);
   --color-on-info: var(--on-info);
-  
+
   --color-discipline-taekwondo: var(--discipline-taekwondo);
   --color-discipline-kungfu: var(--discipline-kungfu);
   --color-discipline-kravmaga: var(--discipline-kravmaga);
   --color-discipline-boxe: var(--discipline-boxe);
   --color-discipline-yoga: var(--discipline-yoga);
   --color-discipline-fitness: var(--discipline-fitness);
-  
+
   --color-gray-50: var(--gray-50);
   --color-gray-100: var(--gray-100);
   --color-gray-200: var(--gray-200);
@@ -259,14 +267,14 @@
   --color-gray-800: var(--gray-800);
   --color-gray-900: var(--gray-900);
   --color-gray-950: var(--gray-950);
-  
+
   --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
   --shadow-inner: var(--shadow-inner);
-  
+
   --radius-none: var(--radius-none);
   --radius-xs: var(--radius-xs);
   --radius-sm: var(--radius-sm);
@@ -276,7 +284,7 @@
   --radius-2xl: var(--radius-2xl);
   --radius-3xl: var(--radius-3xl);
   --radius-full: var(--radius-full);
-  
+
   --font-sans: var(--font-sans-main);
   --font-display: var(--font-display-main);
   /* Make Tailwind use the display font for all headings out of the box */
@@ -301,7 +309,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-display-main);
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -332,6 +345,7 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
+  min-height: 3rem;
   font-family: var(--font-display-main);
   font-size: 1.125rem;
   letter-spacing: 1px;
@@ -371,6 +385,19 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 6px 6px 0px 0px var(--foreground);
 }
 
+.btn-danger {
+  background: var(--error);
+  color: var(--on-error);
+  border-color: var(--foreground);
+}
+
+.btn-danger:hover {
+  background: var(--error);
+  filter: brightness(0.9);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px var(--foreground);
+}
+
 .btn-subtle {
   background: var(--background-tertiary);
   color: var(--foreground);
@@ -389,11 +416,12 @@ h1, h2, h3, h4, h5, h6 {
   border: 2px solid var(--border-strong);
   border-radius: var(--radius-none);
   padding: 0.75rem 1rem;
+  min-height: 3rem;
   color: var(--foreground);
   font-family: var(--font-sans-main);
   font-weight: 500;
   transition: all var(--transition-fast);
-  box-shadow: inset 2px 2px 0px 0px rgba(0,0,0,0.05);
+  box-shadow: inset 2px 2px 0px 0px rgba(0, 0, 0, 0.05);
 }
 
 .input:focus {
@@ -422,10 +450,25 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 2px 2px 0px 0px var(--foreground);
 }
 
-.badge-success { background: var(--success); color: var(--on-success); }
-.badge-error { background: var(--error); color: var(--on-error); }
-.badge-warning { background: var(--warning); color: var(--on-warning); }
-.badge-info { background: var(--info); color: var(--on-info); }
+.badge-success {
+  background: var(--success);
+  color: var(--on-success);
+}
+
+.badge-error {
+  background: var(--error);
+  color: var(--on-error);
+}
+
+.badge-warning {
+  background: var(--warning);
+  color: var(--on-warning);
+}
+
+.badge-info {
+  background: var(--info);
+  color: var(--on-info);
+}
 
 /* Status indicators for disciplines */
 .discipline-badge {
@@ -441,15 +484,33 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: var(--radius-none);
   box-shadow: 3px 3px 0px 0px var(--foreground);
   color: #fff;
-  text-shadow: 1px 1px 0px rgba(0,0,0,0.5); /* contrast booster */
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
+  /* contrast booster */
 }
 
-.discipline-taekwondo { background: var(--discipline-taekwondo); }
-.discipline-kungfu { background: var(--discipline-kungfu); }
-.discipline-kravmaga { background: var(--discipline-kravmaga); }
-.discipline-boxe { background: var(--discipline-boxe); }
-.discipline-yoga { background: var(--discipline-yoga); }
-.discipline-fitness { background: var(--discipline-fitness); }
+.discipline-taekwondo {
+  background: var(--discipline-taekwondo);
+}
+
+.discipline-kungfu {
+  background: var(--discipline-kungfu);
+}
+
+.discipline-kravmaga {
+  background: var(--discipline-kravmaga);
+}
+
+.discipline-boxe {
+  background: var(--discipline-boxe);
+}
+
+.discipline-yoga {
+  background: var(--discipline-yoga);
+}
+
+.discipline-fitness {
+  background: var(--discipline-fitness);
+}
 
 /* Table */
 .table-container {
@@ -461,7 +522,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .table {
   width: 100%;
-  border-collapse: separate; /* Required for borders to show right on brutalism */
+  border-collapse: separate;
+  /* Required for borders to show right on brutalism */
   border-spacing: 0;
 }
 
@@ -488,8 +550,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .table tr:hover td {
-  background: var(--primary);
-  color: var(--on-primary);
+  background: var(--background-tertiary);
+  color: var(--foreground);
   cursor: pointer;
 }
 
@@ -521,8 +583,15 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {
@@ -538,6 +607,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @keyframes pulse-op {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }

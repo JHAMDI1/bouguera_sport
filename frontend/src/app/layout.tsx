@@ -3,6 +3,7 @@ import { Bebas_Neue, Space_Grotesk } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexClientProvider } from "./ConvexClientProvider";
 import { ToastProvider } from "../components/Toast";
+import { AppLayout } from "../components/layout/AppLayout";
 import "./globals.css";
 
 const bebasNeue = Bebas_Neue({
@@ -34,7 +35,9 @@ export default function RootLayout({
             lang="fr"
             className={`${bebasNeue.variable} ${spaceGrotesk.variable} h-full antialiased`}
           >
-            <body className="min-h-full flex flex-col">{children}</body>
+            <body className="min-h-full flex flex-col">
+              <AppLayout>{children}</AppLayout>
+            </body>
           </html>
         </ToastProvider>
       </ConvexClientProvider>

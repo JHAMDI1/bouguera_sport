@@ -42,7 +42,7 @@ export function ConfirmModal({
       confirmBtn: "bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500",
     },
     info: {
-      icon: <CheckCircle className="h-6 w-6 text-primary" />,
+      icon: <CheckCircle className="h-6 w-6 text-primary-text" />,
       iconBg: "bg-blue-100",
       confirmBtn: "bg-primary text-black hover:bg-primary-hover hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_var(--color-foreground)] transition-all focus:ring-blue-500",
     },

@@ -3,10 +3,10 @@
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { 
-  Users, 
-  DollarSign, 
-  TrendingUp, 
+import {
+  Users,
+  DollarSign,
+  TrendingUp,
   AlertCircle,
   Activity,
   Wallet
@@ -17,23 +17,23 @@ export default function DashboardPage() {
   const stats = useQuery(api.dashboard.getDashboardStats);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white shadow-[4px_4px_0px_var(--color-foreground)] border-b">
+      <header className="bg-background-elevated shadow-[4px_4px_0px_var(--color-foreground)] border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Tableau de Bord</h1>
-              <p className="text-sm text-gray-600">
+              <h1 className="text-2xl font-bold text-foreground">Tableau de Bord</h1>
+              <p className="text-sm text-foreground-secondary">
                 Bienvenue, {user?.firstName || user?.emailAddresses[0]?.emailAddress}
               </p>
             </div>
-            <div className="text-sm text-gray-700">
-              {new Date().toLocaleDateString('fr-FR', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+            <div className="text-sm text-foreground-tertiary">
+              {new Date().toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
               })}
             </div>
           </div>
@@ -44,34 +44,34 @@ export default function DashboardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {stats === undefined ? (
           <div className="flex items-center justify-center h-64">
-            <div className="text-gray-700">Chargement...</div>
+            <div className="text-foreground-secondary">Chargement...</div>
           </div>
         ) : (
           <>
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {/* Active Members */}
-              <div className="bg-white rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] p-6">
+              <div className="card p-6">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-none-none bg-blue-100 text-primary">
+                  <div className="p-3 rounded-none bg-primary-subtle text-primary-text">
                     <Users className="h-6 w-6" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Adhérents Actifs</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats?.totalActiveMembers || 0}</p>
+                    <p className="text-sm font-medium text-foreground-secondary">Adhérents Actifs</p>
+                    <p className="text-2xl font-bold text-foreground">{stats?.totalActiveMembers || 0}</p>
                   </div>
                 </div>
               </div>
 
               {/* Monthly Revenue */}
-              <div className="bg-white rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] p-6">
+              <div className="card p-6">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-none-none bg-green-100 text-green-600">
+                  <div className="p-3 rounded-none bg-success-subtle text-success">
                     <DollarSign className="h-6 w-6" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Revenus du Mois</p>
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-sm font-medium text-foreground-secondary">Revenus du Mois</p>
+                    <p className="text-2xl font-bold text-foreground">
                       {(stats?.monthlyRevenue || 0).toLocaleString('fr-FR')} TND
                     </p>
                   </div>
@@ -79,14 +79,14 @@ export default function DashboardPage() {
               </div>
 
               {/* Net Profit */}
-              <div className="bg-white rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] p-6">
+              <div className="card p-6">
                 <div className="flex items-center">
-                  <div className={`p-3 rounded-none-none ${(stats?.netProfit || 0) >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                  <div className={`p-3 rounded-none ${(stats?.netProfit || 0) >= 0 ? 'bg-success-subtle text-success' : 'bg-error-subtle text-error'}`}>
                     <TrendingUp className="h-6 w-6" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Bénéfice Net</p>
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-sm font-medium text-foreground-secondary">Bénéfice Net</p>
+                    <p className="text-2xl font-bold text-foreground">
                       {(stats?.netProfit || 0).toLocaleString('fr-FR')} TND
                     </p>
                   </div>
@@ -94,50 +94,50 @@ export default function DashboardPage() {
               </div>
 
               {/* Unpaid Count */}
-              <div className="bg-white rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] p-6">
+              <div className="card p-6">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-none-none bg-orange-100 text-orange-600">
+                  <div className="p-3 rounded-none bg-warning-subtle text-warning">
                     <AlertCircle className="h-6 w-6" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Impayés</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats?.unpaidCount || 0}</p>
+                    <p className="text-sm font-medium text-foreground-secondary">Impayés</p>
+                    <p className="text-2xl font-bold text-foreground">{stats?.unpaidCount || 0}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Actions Rapides</h2>
+            <div className="card p-6">
+              <h2 className="text-lg font-semibold text-foreground mb-4">Actions Rapides</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <a 
+                <a
                   href="/members"
-                  className="flex items-center p-4 border-2 border-foreground rounded-none-none hover:bg-gray-50 transition-colors"
+                  className="flex items-center p-4 border-2 border-border rounded-none hover:bg-background-tertiary transition-colors cursor-pointer"
                 >
-                  <Users className="h-5 w-5 text-primary mr-3" />
-                  <span className="font-medium">Gestion Adhérents</span>
+                  <Users className="h-5 w-5 text-primary-text mr-3" />
+                  <span className="font-medium text-foreground">Gestion Adhérents</span>
                 </a>
-                <a 
+                <a
                   href="/payments"
-                  className="flex items-center p-4 border-2 border-foreground rounded-none-none hover:bg-gray-50 transition-colors"
+                  className="flex items-center p-4 border-2 border-border rounded-none hover:bg-background-tertiary transition-colors cursor-pointer"
                 >
-                  <Wallet className="h-5 w-5 text-green-600 mr-3" />
-                  <span className="font-medium">Nouveau Paiement</span>
+                  <Wallet className="h-5 w-5 text-primary-text mr-3" />
+                  <span className="font-medium text-foreground">Nouveau Paiement</span>
                 </a>
-                <a 
+                <a
                   href="/disciplines"
-                  className="flex items-center p-4 border-2 border-foreground rounded-none-none hover:bg-gray-50 transition-colors"
+                  className="flex items-center p-4 border-2 border-border rounded-none hover:bg-background-tertiary transition-colors cursor-pointer"
                 >
-                  <Activity className="h-5 w-5 text-purple-600 mr-3" />
-                  <span className="font-medium">Disciplines</span>
+                  <Activity className="h-5 w-5 text-primary-text mr-3" />
+                  <span className="font-medium text-foreground">Disciplines</span>
                 </a>
-                <a 
+                <a
                   href="/expenses"
-                  className="flex items-center p-4 border-2 border-foreground rounded-none-none hover:bg-gray-50 transition-colors"
+                  className="flex items-center p-4 border-2 border-border rounded-none hover:bg-background-tertiary transition-colors cursor-pointer"
                 >
-                  <DollarSign className="h-5 w-5 text-red-600 mr-3" />
-                  <span className="font-medium">Dépenses</span>
+                  <DollarSign className="h-5 w-5 text-primary-text mr-3" />
+                  <span className="font-medium text-foreground">Dépenses</span>
                 </a>
               </div>
             </div>

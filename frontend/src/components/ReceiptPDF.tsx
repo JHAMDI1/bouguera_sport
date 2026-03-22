@@ -72,7 +72,7 @@ Merci pour votre paiement!
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b bg-gray-50">
           <div className="flex items-center">
-            <Receipt className="h-5 w-5 text-primary mr-2" />
+            <Receipt className="h-5 w-5 text-primary-text mr-2" />
             <h2 className="text-lg font-bold text-gray-900">Reçu {data.receiptNumber}</h2>
           </div>
           <div className="flex items-center space-x-2">
@@ -143,7 +143,7 @@ Merci pour votre paiement!
                 </tr>
                 <tr className="bg-gray-50">
                   <td className="py-3 text-gray-900 font-semibold">Montant Total</td>
-                  <td className="py-3 text-right font-bold text-lg text-primary">
+                  <td className="py-3 text-right font-bold text-lg text-primary-text">
                     {data.amount.toLocaleString("fr-FR")} TND
                   </td>
                 </tr>

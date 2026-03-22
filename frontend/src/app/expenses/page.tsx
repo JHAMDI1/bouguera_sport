@@ -1,36 +1,23 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { DollarSign, Plus, TrendingDown, X, Check, Calendar, FileText, Loader2 } from "lucide-react";
+import { TrendingDown, Plus, FileText } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useToastHelpers } from "@/components/Toast";
-import { ConfirmModal, useConfirmModal } from "@/components/ConfirmModal";
-
-const expenseSchema = z.object({
-  categoryId: z.string().min(1, "Catégorie requise"),
-  description: z.string().min(2, "Description requise"),
-  amount: z.number().min(0.001, "Montant requis"),
-  expenseDate: z.number().min(1, "Date requise"),
-  receiptUrl: z.string().optional(),
-});
-
-type ExpenseFormData = z.infer<typeof expenseSchema>;
+import { ConfirmModal } from "@/components/ConfirmModal";
+import { expenseSchema, type ExpenseFormData } from "@/schemas";
+import { useExpenses } from "@/features/expenses/useExpenses";
+import { PageHeader } from "@/components/PageHeader";
+import { DataTable, type Column } from "@/components/DataTable";
+import { FormModal } from "@/components/FormModal";
+import { FormInput } from "@/components/FormInput";
+import { FormSelect } from "@/components/FormSelect";
 
 export default function ExpensesPage() {
-  const expenses = useQuery(api.payments.getExpenses, {});
-  const categories = useQuery(api.payments.getExpenseCategories);
-  const users = useQuery(api.users.getUsers, {});
-  const createExpense = useMutation(api.coaches.createExpense);
-  const toast = useToastHelpers();
-  const { confirm, modalProps } = useConfirmModal();
+  const { expenses, categories, isSubmitting, createExpense, getCategoryName, getRecordedByName, modalProps } = useExpenses();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
@@ -53,270 +40,131 @@ export default function ExpensesPage() {
     formState: { errors },
   } = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
-    defaultValues: {
-      expenseDate: Date.now(),
-    },
+    defaultValues: { expenseDate: Date.now() },
   });
 
   const onSubmit = async (data: ExpenseFormData) => {
-    setIsSubmitting(true);
-    try {
-      const currentUser = users?.[0];
-      if (!currentUser) {
-        toast.error("Erreur", "Utilisateur non connecté");
-        setIsSubmitting(false);
-        return;
-      }
-
-      await createExpense({
-        ...data,
-        categoryId: data.categoryId as any,
-        recordedBy: currentUser._id,
-      });
-      toast.success("Dépense enregistrée", `${data.description} - ${data.amount.toLocaleString("fr-FR")} TND`);
+    await createExpense(data, () => {
       setIsCreateModalOpen(false);
-      reset({
-        expenseDate: Date.now(),
-      });
-    } catch (error) {
-      console.error("Erreur création dépense:", error);
-      toast.error("Erreur", "Impossible d'enregistrer la dépense");
-    } finally {
-      setIsSubmitting(false);
+      reset({ expenseDate: Date.now() });
+    });
+  };
+
+  const columns: Column<any>[] = [
+    {
+      header: "Date",
+      accessor: (expense) => (
+        <span className="text-sm text-foreground-secondary">
+          {new Date(expense.expenseDate).toLocaleDateString("fr-FR")}
+        </span>
+      )
+    },
+    {
+      header: "Catégorie",
+      accessor: (expense) => (
+        <span className="badge badge-warning">{getCategoryName(expense.categoryId)}</span>
+      )
+    },
+    {
+      header: "Description",
+      accessor: (expense) => (
+        <div className="flex items-center text-sm text-foreground">
+          <FileText className="h-4 w-4 mr-2 text-foreground-muted" />
+          {expense.description}
+        </div>
+      )
+    },
+    {
+      header: "Montant",
+      accessor: (expense) => (
+        <span className="text-sm text-error font-semibold">
+          {expense.amount.toLocaleString("fr-FR")} TND
+        </span>
+      )
+    },
+    {
+      header: "Enregistré par",
+      accessor: (expense) => (
+        <span className="text-sm text-foreground-secondary">
+          {getRecordedByName(expense.recordedBy)}
+        </span>
+      )
     }
-  };
-
-  const getCategoryName = (id: string) => {
-    return categories?.find((c) => c._id === id)?.name || "Inconnu";
-  };
-
-  const getRecordedByName = (id: string) => {
-    const user = users?.find((u) => u._id === id);
-    return user?.fullName || "Inconnu";
-  };
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-[4px_4px_0px_var(--color-foreground)] border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <TrendingDown className="h-6 w-6 text-red-600 mr-3" />
-              <h1 className="text-2xl font-bold text-gray-900">Gestion des Dépenses</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm text-gray-600">Dépenses ce mois</p>
-                <p className="text-xl font-bold text-red-600">{totalExpenses.toLocaleString("fr-FR")} TND</p>
-              </div>
-              <button
-                onClick={() => setIsCreateModalOpen(true)}
-                className="bg-red-600 text-white px-4 py-2 rounded-none-none flex items-center hover:bg-red-700"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Nouvelle Dépense
-              </button>
-            </div>
-          </div>
+    <div className="min-h-screen bg-background">
+      <PageHeader
+        title="Gestion des Dépenses"
+        icon={<TrendingDown className="h-6 w-6" />}
+        action={
+          <button onClick={() => setIsCreateModalOpen(true)} className="btn btn-primary">
+            <Plus className="h-4 w-4 mr-2" />
+            Nouvelle Dépense
+          </button>
+        }
+      >
+        <div className="text-right mr-4">
+          <p className="text-sm text-foreground-secondary">Dépenses ce mois</p>
+          <p className="text-xl font-bold text-error">{totalExpenses.toLocaleString("fr-FR")} TND</p>
         </div>
-      </header>
+      </PageHeader>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filters */}
         <div className="mb-6">
           <select
-            className="border-2 border-foreground rounded-none-none px-4 py-2"
+            className="input w-64"
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
           >
             <option value="">Toutes les catégories</option>
             {categories?.map((cat) => (
-              <option key={cat._id} value={cat._id}>
-                {cat.name}
-              </option>
+              <option key={cat._id} value={cat._id}>{cat.name}</option>
             ))}
           </select>
         </div>
 
-        {/* Expenses Table */}
-        <div className="bg-white rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] overflow-hidden">
-          <table className="min-w-full divide-y-2-2 divide-foreground">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Catégorie</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Description</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Montant</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Enregistré par</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y-2 divide-foreground">
-              {filteredExpenses?.map((expense) => (
-                <tr key={expense._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {new Date(expense.expenseDate).toLocaleDateString("fr-FR")}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <span className="px-2 py-1 text-xs rounded-none-none bg-orange-100 text-orange-800">
-                      {getCategoryName(expense.categoryId)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <div className="flex items-center">
-                      <FileText className="h-4 w-4 mr-2 text-gray-500" />
-                      {expense.description}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold">
-                    {expense.amount.toLocaleString("fr-FR")} TND
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {getRecordedByName(expense.recordedBy)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {!expenses && (
-            <div className="text-center py-8 text-gray-700">Chargement...</div>
-          )}
-          {filteredExpenses?.length === 0 && (
-            <div className="text-center py-8 text-gray-700">Aucune dépense trouvée</div>
-          )}
-        </div>
+        <DataTable
+          data={filteredExpenses}
+          columns={columns}
+          keyExtractor={(e) => e._id}
+          isLoading={!expenses}
+          emptyMessage="Aucune dépense trouvée"
+        />
       </main>
 
-      {/* Modal Création Dépense */}
-      {isCreateModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-none-none p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900">Nouvelle Dépense</h2>
-              <button
-                onClick={() => setIsCreateModalOpen(false)}
-                disabled={isSubmitting}
-                className="text-gray-500 hover:text-gray-600 disabled:opacity-50"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <div className="space-y-4">
-                {/* Catégorie */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Catégorie</label>
-                  <select
-                    {...register("categoryId")}
-                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-red-500 focus:ring-red-500 border-2 border-foreground px-3 py-2"
-                    disabled={isSubmitting}
-                  >
-                    <option value="">Sélectionner une catégorie</option>
-                    {categories?.map((c) => (
-                      <option key={c._id} value={c._id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.categoryId && (
-                    <p className="mt-1 text-sm text-red-600">{errors.categoryId.message}</p>
-                  )}
-                </div>
+      <FormModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        title="Nouvelle Dépense"
+        isSubmitting={isSubmitting}
+        onSubmit={handleSubmit(onSubmit)}
+        submitText="Enregistrer"
+      >
+        <FormSelect label="Catégorie" registration={register("categoryId")} error={errors.categoryId} disabled={isSubmitting}>
+          <option value="">Sélectionner une catégorie</option>
+          {categories?.map((c) => (
+            <option key={c._id} value={c._id}>{c.name}</option>
+          ))}
+        </FormSelect>
 
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Description</label>
-                  <input
-                    {...register("description")}
-                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-red-500 focus:ring-red-500 border-2 border-foreground px-3 py-2"
-                    placeholder="Loyer, électricité, matériel..."
-                    disabled={isSubmitting}
-                  />
-                  {errors.description && (
-                    <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
-                  )}
-                </div>
+        <FormInput label="Description" registration={register("description")} error={errors.description} placeholder="Loyer, électricité, matériel..." disabled={isSubmitting} />
+        <FormInput label="Montant (TND)" registration={register("amount", { valueAsNumber: true })} error={errors.amount} type="number" min={0.001} step={0.001} inputMode="decimal" placeholder="500.000" disabled={isSubmitting} />
 
-                {/* Montant */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Montant (TND)</label>
-                  <input
-                    {...register("amount", { valueAsNumber: true })}
-                    type="number"
-                    min={0.001}
-                    step={0.001}
-                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-red-500 focus:ring-red-500 border-2 border-foreground px-3 py-2"
-                    placeholder="500.000"
-                    disabled={isSubmitting}
-                  />
-                  {errors.amount && (
-                    <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>
-                  )}
-                </div>
+        <FormInput
+          label="Date de dépense"
+          registration={register("expenseDate", {
+            valueAsNumber: true,
+            onChange: (e) => new Date(e.target.value).getTime(),
+          })}
+          error={errors.expenseDate}
+          type="date"
+          disabled={isSubmitting}
+        />
 
-                {/* Date */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Date de dépense</label>
-                  <input
-                    {...register("expenseDate", {
-                      valueAsNumber: true,
-                      onChange: (e) => {
-                        const date = new Date(e.target.value);
-                        return date.getTime();
-                      },
-                    })}
-                    type="date"
-                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-red-500 focus:ring-red-500 border-2 border-foreground px-3 py-2"
-                    disabled={isSubmitting}
-                  />
-                  {errors.expenseDate && (
-                    <p className="mt-1 text-sm text-red-600">{errors.expenseDate.message}</p>
-                  )}
-                </div>
+        <FormInput label="URL du reçu (optionnel)" registration={register("receiptUrl")} error={errors.receiptUrl} placeholder="https://..." disabled={isSubmitting} />
+      </FormModal>
 
-                {/* URL Reçu (optionnel) */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">URL du reçu (optionnel)</label>
-                  <input
-                    {...register("receiptUrl")}
-                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-red-500 focus:ring-red-500 border-2 border-foreground px-3 py-2"
-                    placeholder="https://..."
-                    disabled={isSubmitting}
-                  />
-                </div>
-              </div>
-              <div className="mt-6 flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  disabled={isSubmitting}
-                  className="px-4 py-2 border-2 border-foreground border-2 border-foreground rounded-none-none text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-4 py-2 bg-red-600 text-white rounded-none-none hover:bg-red-700 flex items-center disabled:opacity-50"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Enregistrement...
-                    </>
-                  ) : (
-                    <>
-                      <Check className="h-4 w-4 mr-2" />
-                      Enregistrer
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Confirm Modal */}
       <ConfirmModal {...modalProps} />
     </div>
   );
