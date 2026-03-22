@@ -14,6 +14,9 @@ import { FormModal } from "@/components/FormModal";
 import { FormInput } from "@/components/FormInput";
 import { FormSelect } from "@/components/FormSelect";
 import { SearchInput } from "@/components/SearchInput";
+import { MediaUploader } from "@/components/MediaUploader";
+import { Avatar } from "@/components/Avatar";
+import { DropdownMenu, DropdownItem } from "@/components/DropdownMenu";
 
 export default function MembersPage() {
   const { members, isSubmitting, createMember, updateMember, deleteMember, toggleStatus, modalProps } = useMembers();
@@ -26,6 +29,7 @@ export default function MembersPage() {
     register: registerCreate,
     handleSubmit: handleSubmitCreate,
     reset: resetCreate,
+    setValue: setValueCreate,
     formState: { errors: createErrors },
   } = useForm<MemberFormData>({ resolver: zodResolver(memberSchema) });
 
@@ -33,6 +37,7 @@ export default function MembersPage() {
     register: registerUpdate,
     handleSubmit: handleSubmitUpdate,
     reset: resetUpdate,
+    setValue: setValueUpdate,
     formState: { errors: updateErrors },
   } = useForm<MemberFormData>({ resolver: zodResolver(memberSchema) });
 
@@ -62,6 +67,8 @@ export default function MembersPage() {
       lastName: member.lastName,
       phone: member.phone || "",
       gender: member.gender || "male",
+      photoUrl: member.photoUrl || "",
+      medicalCertificateUrl: member.medicalCertificateUrl || "",
     });
   };
 
@@ -70,9 +77,7 @@ export default function MembersPage() {
       header: "Adhérent",
       accessor: (member) => (
         <div className="flex items-center">
-          <div className="h-10 w-10 rounded-none bg-primary-subtle flex items-center justify-center mr-3">
-            <UserCircle className="h-6 w-6 text-primary-text" />
-          </div>
+          <Avatar src={member.photoUrl} name={`${member.firstName} ${member.lastName}`} className="mr-3" />
           <div>
             <div className="text-sm font-medium text-foreground">
               {member.firstName} {member.lastName}
@@ -115,12 +120,14 @@ export default function MembersPage() {
       header: "Actions",
       className: "text-right",
       accessor: (member) => (
-        <button
-          onClick={() => openEditModal(member)}
-          className="text-primary-text hover:text-primary-active transition-colors p-2"
-        >
-          <Edit className="h-4 w-4" />
-        </button>
+        <DropdownMenu>
+          <DropdownItem icon={<Edit />} onClick={() => openEditModal(member)}>
+            Modifier
+          </DropdownItem>
+          <DropdownItem danger icon={<Trash2 />} onClick={() => deleteMember(member, () => { })}>
+            Supprimer
+          </DropdownItem>
+        </DropdownMenu>
       )
     }
   ];
@@ -168,12 +175,33 @@ export default function MembersPage() {
           <FormInput label="Prénom" registration={registerCreate("firstName")} error={createErrors.firstName} disabled={isSubmitting} />
           <FormInput label="Nom" registration={registerCreate("lastName")} error={createErrors.lastName} disabled={isSubmitting} />
         </div>
-        <FormInput label="Téléphone" registration={registerCreate("phone")} type="tel" placeholder="+216 XX XXX XXX" disabled={isSubmitting} />
-        <FormSelect label="Genre" registration={registerCreate("gender")} disabled={isSubmitting}>
-          <option value="male">Homme</option>
-          <option value="female">Femme</option>
-          <option value="other">Autre</option>
-        </FormSelect>
+        <div className="grid grid-cols-2 gap-4">
+          <FormInput label="Téléphone" registration={registerCreate("phone")} type="tel" placeholder="+216 XX XXX XXX" disabled={isSubmitting} />
+          <FormSelect label="Genre" registration={registerCreate("gender")} disabled={isSubmitting}>
+            <option value="male">Homme</option>
+            <option value="female">Femme</option>
+            <option value="other">Autre</option>
+          </FormSelect>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <div>
+            <label className="block text-sm font-medium text-foreground-secondary mb-1">Photo de Profil</label>
+            <MediaUploader
+              onUploadComplete={(id) => setValueCreate("photoUrl", id)}
+              accept="image/*"
+              label="Photo"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground-secondary mb-1">Certificat Médical</label>
+            <MediaUploader
+              onUploadComplete={(id) => setValueCreate("medicalCertificateUrl", id)}
+              accept="application/pdf,image/*"
+              label="Certificat"
+            />
+          </div>
+        </div>
       </FormModal>
 
       <FormModal
@@ -188,12 +216,33 @@ export default function MembersPage() {
           <FormInput label="Prénom" registration={registerUpdate("firstName")} error={updateErrors.firstName} disabled={isSubmitting} />
           <FormInput label="Nom" registration={registerUpdate("lastName")} error={updateErrors.lastName} disabled={isSubmitting} />
         </div>
-        <FormInput label="Téléphone" registration={registerUpdate("phone")} type="tel" disabled={isSubmitting} />
-        <FormSelect label="Genre" registration={registerUpdate("gender")} disabled={isSubmitting}>
-          <option value="male">Homme</option>
-          <option value="female">Femme</option>
-          <option value="other">Autre</option>
-        </FormSelect>
+        <div className="grid grid-cols-2 gap-4">
+          <FormInput label="Téléphone" registration={registerUpdate("phone")} type="tel" disabled={isSubmitting} />
+          <FormSelect label="Genre" registration={registerUpdate("gender")} disabled={isSubmitting}>
+            <option value="male">Homme</option>
+            <option value="female">Femme</option>
+            <option value="other">Autre</option>
+          </FormSelect>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <div>
+            <label className="block text-sm font-medium text-foreground-secondary mb-1">Photo de Profil</label>
+            <MediaUploader
+              onUploadComplete={(id) => setValueUpdate("photoUrl", id)}
+              accept="image/*"
+              label="Photo"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground-secondary mb-1">Certificat Médical</label>
+            <MediaUploader
+              onUploadComplete={(id) => setValueUpdate("medicalCertificateUrl", id)}
+              accept="application/pdf,image/*"
+              label="Certificat"
+            />
+          </div>
+        </div>
 
         <div className="mt-6 pt-4 border-t border-border">
           <button

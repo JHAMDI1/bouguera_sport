@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Printer, Download, X, Receipt } from "lucide-react";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { PaymentReceiptPDF } from "./pdf/PaymentReceiptPDF";
+import { Doc } from "../../convex/_generated/dataModel";
 
-interface ReceiptData {
+export interface ReceiptData {
   receiptNumber: string;
   memberName: string;
   amount: number;
@@ -21,6 +24,11 @@ interface ReceiptPDFProps {
 
 export function ReceiptPDF({ data, onClose }: ReceiptPDFProps) {
   const [isPrinting, setIsPrinting] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handlePrint = () => {
     setIsPrinting(true);
@@ -28,47 +36,9 @@ export function ReceiptPDF({ data, onClose }: ReceiptPDFProps) {
     setTimeout(() => setIsPrinting(false), 1000);
   };
 
-  const handleDownload = () => {
-    // Créer un Blob avec le contenu du reçu en texte
-    const receiptContent = `
-REÇU DE PAIEMENT
-================
-
-N° Reçu: ${data.receiptNumber}
-Date: ${data.paymentDate}
-
-ADHÉRENT
---------
-Nom: ${data.memberName}
-${data.discipline ? `Discipline: ${data.discipline}` : ""}
-
-DÉTAILS DU PAIEMENT
--------------------
-Mois: ${data.month} ${data.year}
-Montant: ${data.amount.toLocaleString("fr-FR")} TND
-Méthode: Espèces
-
-REÇU PAR
---------
-${data.receivedBy}
-
-Merci pour votre paiement!
-    `.trim();
-
-    const blob = new Blob([receiptContent], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `Recu_${data.receiptNumber}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-none-none w-full max-w-lg max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-hidden shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b bg-gray-50">
           <div className="flex items-center">
@@ -76,23 +46,32 @@ Merci pour votre paiement!
             <h2 className="text-lg font-bold text-gray-900">Reçu {data.receiptNumber}</h2>
           </div>
           <div className="flex items-center space-x-2">
-            <button
-              onClick={handleDownload}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-none"
-              title="Télécharger"
-            >
-              <Download className="h-4 w-4" />
-            </button>
+            {isMounted && (
+              <PDFDownloadLink
+                document={<PaymentReceiptPDF data={data} />}
+                fileName={`Recu_Paiement_${data.receiptNumber}.pdf`}
+              >
+                {({ loading }) => (
+                  <button
+                    className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg disabled:opacity-50 transition-colors"
+                    title="Télécharger PDF"
+                    disabled={loading}
+                  >
+                    <Download className="h-4 w-4" />
+                  </button>
+                )}
+              </PDFDownloadLink>
+            )}
             <button
               onClick={handlePrint}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-none"
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
               title="Imprimer"
             >
               <Printer className="h-4 w-4" />
             </button>
             <button
               onClick={onClose}
-              className="p-2 text-gray-500 hover:text-gray-600 hover:bg-gray-200 rounded-none"
+              className="p-2 text-gray-500 hover:text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
@@ -105,7 +84,7 @@ Merci pour votre paiement!
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-gray-900">CLUB SPORTIF</h1>
             <p className="text-sm text-gray-600">Reçu de Paiement</p>
-            <div className="mt-2 inline-block px-3 py-1 bg-indigo-100 text-indigo-800 text-sm font-medium rounded-none">
+            <div className="mt-2 inline-block px-3 py-1 bg-indigo-100 text-indigo-800 text-sm font-medium rounded-full">
               N° {data.receiptNumber}
             </div>
           </div>
@@ -116,7 +95,7 @@ Merci pour votre paiement!
           </div>
 
           {/* Member Info */}
-          <div className="border-t border-b border-2 border-foreground py-4 mb-4">
+          <div className="border-t border-b border-gray-200 py-4 mb-4">
             <h3 className="font-semibold text-gray-900 mb-2">Adhérent</h3>
             <p className="text-gray-800">
               <span className="font-medium">Nom:</span> {data.memberName}
@@ -133,11 +112,11 @@ Merci pour votre paiement!
             <h3 className="font-semibold text-gray-900 mb-3">Détails du Paiement</h3>
             <table className="w-full text-sm">
               <tbody>
-                <tr className="border-b border-2 border-foreground">
+                <tr className="border-b border-gray-200">
                   <td className="py-2 text-gray-600">Période</td>
                   <td className="py-2 text-right font-medium">{data.month} {data.year}</td>
                 </tr>
-                <tr className="border-b border-2 border-foreground">
+                <tr className="border-b border-gray-200">
                   <td className="py-2 text-gray-600">Méthode de paiement</td>
                   <td className="py-2 text-right font-medium">Espèces</td>
                 </tr>
@@ -157,7 +136,7 @@ Merci pour votre paiement!
           </div>
 
           {/* Signature Area */}
-          <div className="mt-8 pt-4 border-t border-2 border-foreground">
+          <div className="mt-8 pt-4 border-t border-gray-200">
             <div className="flex justify-between items-end">
               <div>
                 <p className="text-xs text-gray-700 mb-1">Signature du Caissier</p>
@@ -203,10 +182,10 @@ Merci pour votre paiement!
 // Hook to generate receipt data from payment
 export function useReceiptGenerator() {
   const generateReceiptData = (
-    payment: any,
-    member: any,
-    user: any,
-    discipline?: any
+    payment: Doc<"payments">,
+    member?: Doc<"members">,
+    user?: { fullName?: string | null },
+    discipline?: Doc<"disciplines">
   ): ReceiptData => {
     const months = [
       "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",

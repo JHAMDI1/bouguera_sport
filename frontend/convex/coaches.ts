@@ -1,15 +1,16 @@
 import { v } from "convex/values";
 import { mutation } from "./_generated/server";
+import { requireAdmin } from "./auth";
 
 export const createCoach = mutation({
   args: {
-    clerkId: v.string(),
     email: v.string(),
     fullName: v.string(),
     phone: v.optional(v.string()),
     createdBy: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const { createdBy, ...coachData } = args;
     const coachId = await ctx.db.insert("users", {
       ...coachData,
@@ -41,6 +42,7 @@ export const updateCoach = mutation({
     updatedBy: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const { id, updatedBy, ...updates } = args;
     await ctx.db.patch(id, updates);
 
@@ -61,6 +63,7 @@ export const updateCoach = mutation({
 export const deleteCoach = mutation({
   args: { id: v.id("users"), deletedBy: v.optional(v.id("users")) },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const coach = await ctx.db.get(args.id);
     if (coach && args.deletedBy) {
       await ctx.db.insert("auditLog", {
@@ -84,6 +87,7 @@ export const createDiscipline = mutation({
     createdBy: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const { createdBy, ...disciplineData } = args;
     const disciplineId = await ctx.db.insert("disciplines", {
       ...disciplineData,
@@ -114,6 +118,7 @@ export const updateDiscipline = mutation({
     isActive: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const { id, ...updates } = args;
     await ctx.db.patch(id, updates);
     return id;
@@ -123,6 +128,7 @@ export const updateDiscipline = mutation({
 export const deleteDiscipline = mutation({
   args: { id: v.id("disciplines"), deletedBy: v.optional(v.id("users")) },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const discipline = await ctx.db.get(args.id);
     if (discipline && args.deletedBy) {
       await ctx.db.insert("auditLog", {

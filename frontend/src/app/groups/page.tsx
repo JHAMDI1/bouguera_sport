@@ -16,9 +16,11 @@ import { PageHeader } from "@/components/PageHeader";
 import { DataTable, type Column } from "@/components/DataTable";
 import { StatusBadge } from "@/components/StatusBadge";
 import { FormModal } from "@/components/FormModal";
-import { FormInput } from "@/components/FormInput";
 import { FormSelect } from "@/components/FormSelect";
 import { getDisciplineName, getCoachName } from "@/lib/lookups";
+import { Avatar } from "@/components/Avatar";
+import { DropdownMenu, DropdownItem } from "@/components/DropdownMenu";
+import { FormInput } from "@/components/FormInput";
 
 export default function GroupsPage() {
   const { groups, disciplines, coaches, isSubmitting, createGroup, updateGroup, deleteGroup, toggleStatus, modalProps } = useGroups();
@@ -70,7 +72,12 @@ export default function GroupsPage() {
   const columns: Column<any>[] = [
     {
       header: "Groupe",
-      accessor: (group) => <span className="text-sm font-medium text-foreground">{group.name}</span>
+      accessor: (group) => (
+        <div className="flex items-center">
+          <Avatar name={group.name} size="sm" className="mr-3" />
+          <span className="text-sm font-medium text-foreground">{group.name}</span>
+        </div>
+      )
     },
     {
       header: "Discipline",
@@ -112,12 +119,14 @@ export default function GroupsPage() {
       header: "Actions",
       className: "text-right",
       accessor: (group) => (
-        <button
-          onClick={() => openEditModal(group)}
-          className="text-primary-text hover:text-primary-active transition-colors p-2"
-        >
-          <Edit className="h-4 w-4" />
-        </button>
+        <DropdownMenu>
+          <DropdownItem icon={<Edit />} onClick={() => openEditModal(group)}>
+            Modifier
+          </DropdownItem>
+          <DropdownItem danger icon={<Trash2 />} onClick={() => deleteGroup(group, () => { })}>
+            Supprimer
+          </DropdownItem>
+        </DropdownMenu>
       )
     }
   ];

@@ -151,3 +151,100 @@ export const getMembersReport = query({
     };
   },
 });
+
+// ─── Analytics Avancées (Charts) ──────────────────────────────────────────────
+
+export const getAdvancedAnalytics = query({
+  handler: async (ctx) => {
+    // 1. Revenus des 6 derniers mois
+    const currentMonth = new Date().getMonth() + 1;
+    const currentYear = new Date().getFullYear();
+    const sixMonthsAgoDate = new Date(currentYear, currentMonth - 6, 1);
+    const sixMonthsAgo = sixMonthsAgoDate.getTime();
+
+    const recentPayments = await ctx.db
+      .query("payments")
+      .withIndex("by_paymentDate", (q) => q.gte("paymentDate", sixMonthsAgo))
+      .collect();
+
+    const recentExpenses = await ctx.db
+      .query("expenses")
+      .withIndex("by_expenseDate", (q) => q.gte("expenseDate", sixMonthsAgo))
+      .collect();
+
+    // Initialize the last 6 months array
+    const monthlyData = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(currentYear, currentMonth - 1 - i, 1);
+      const m = d.getMonth() + 1;
+      const y = d.getFullYear();
+      const monthName = d.toLocaleDateString("fr-FR", { month: "short" });
+      monthlyData.push({
+        name: `${monthName} ${y.toString().slice(2)}`,
+        month: m,
+        year: y,
+        revenue: 0,
+        expenses: 0,
+      });
+    }
+
+    // Populate revenue
+    for (const p of recentPayments) {
+      const target = monthlyData.find(
+        (md) => md.month === p.monthCovered && md.year === p.yearCovered
+      );
+      if (target) target.revenue += p.amount;
+    }
+    // Populate expenses
+    for (const e of recentExpenses) {
+      const date = new Date(e.expenseDate);
+      const m = date.getMonth() + 1;
+      const y = date.getFullYear();
+      const target = monthlyData.find((md) => md.month === m && md.year === y);
+      if (target) target.expenses += e.amount;
+    }
+
+    // 2. Répartition par Discipline (Abonnements actifs)
+    const activeMembers = await ctx.db
+      .query("members")
+      .withIndex("by_isActive", (q) => q.eq("isActive", true))
+      .collect();
+
+    const subscriptions = await ctx.db
+      .query("memberSubscriptions")
+      .filter((q) => q.eq(q.field("isActive"), true))
+      .collect();
+
+    const disciplines = await ctx.db.query("disciplines").collect();
+
+    const disciplineDistribution = disciplines.map((d) => {
+      const count = subscriptions.filter((s) => s.disciplineId === d._id).length;
+      return {
+        name: d.name,
+        count,
+        color: d.color || "#6366F1" // fallback modern indigo
+      };
+    }).filter(d => d.count > 0);
+
+    // 3. Répartition par Genre
+    let male = 0;
+    let female = 0;
+    let other = 0;
+    for (const m of activeMembers) {
+      if (m.gender === "male") male++;
+      else if (m.gender === "female") female++;
+      else other++;
+    }
+    const genderDistribution = [
+      { name: "Hommes", value: male, color: "#3B82F6" },
+      { name: "Femmes", value: female, color: "#EC4899" }
+    ];
+    if (other > 0) genderDistribution.push({ name: "Autres", value: other, color: "#8B5CF6" });
+
+    return {
+      revenueHistory: monthlyData,
+      disciplineDistribution,
+      genderDistribution
+    };
+  },
+});

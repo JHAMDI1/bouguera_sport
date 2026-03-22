@@ -15,6 +15,8 @@ import { FormInput } from "@/components/FormInput";
 import { FormSelect } from "@/components/FormSelect";
 import { SearchInput } from "@/components/SearchInput";
 import { getMemberName, getUserName } from "@/lib/lookups";
+import { Avatar } from "@/components/Avatar";
+import { DropdownMenu, DropdownItem } from "@/components/DropdownMenu";
 
 export default function PaymentsPage() {
   const {
@@ -132,23 +134,25 @@ export default function PaymentsPage() {
     },
     {
       header: "Membre/Famille",
-      accessor: (payment) => (
-        <div className="text-sm text-foreground">
-          {payment.memberId ? (
-            <div className="flex items-center">
-              <User className="h-4 w-4 mr-1 text-primary-text" />
-              {getMemberName(members, payment.memberId)}
+      accessor: (payment) => {
+        if (payment.memberId) {
+          const memberName = getMemberName(members, payment.memberId);
+          return (
+            <div className="flex items-center text-sm text-foreground">
+              <Avatar name={memberName} size="sm" className="mr-2" />
+              {memberName}
             </div>
-          ) : payment.familyId ? (
-            <div className="flex items-center">
-              <Users className="h-4 w-4 mr-1 text-secondary" />
+          );
+        } else if (payment.familyId) {
+          return (
+            <div className="flex items-center text-sm text-foreground">
+              <Avatar name="Famille" size="sm" className="mr-2 ring-2 ring-secondary/20" />
               Famille
             </div>
-          ) : (
-            "-"
-          )}
-        </div>
-      )
+          );
+        }
+        return <span className="text-sm text-foreground">-</span>;
+      }
     },
     {
       header: "Montant",
@@ -189,22 +193,14 @@ export default function PaymentsPage() {
       header: "Actions",
       className: "text-right",
       accessor: (payment) => (
-        <div className="flex justify-end gap-2">
-          <button
-            onClick={() => handleViewReceipt(payment)}
-            className="text-primary-text hover:text-primary-active flex items-center text-sm transition-colors p-2"
-            title="Voir le reçu"
-          >
-            <Printer className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => handleEdit(payment)}
-            className="text-primary-text hover:text-primary-active transition-colors p-2"
-            title="Modifier le paiement"
-          >
-            <Edit className="h-4 w-4" />
-          </button>
-        </div>
+        <DropdownMenu>
+          <DropdownItem icon={<Printer />} onClick={() => handleViewReceipt(payment)}>
+            Voir le reçu
+          </DropdownItem>
+          <DropdownItem icon={<Edit />} onClick={() => handleEdit(payment)}>
+            Modifier
+          </DropdownItem>
+        </DropdownMenu>
       )
     }
   ];

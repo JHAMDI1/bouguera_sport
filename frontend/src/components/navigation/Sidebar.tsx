@@ -26,9 +26,9 @@ export function Sidebar() {
                         <Link
                             key={link.href}
                             href={link.href}
-                            className={`flex items-center px-4 py-3 text-sm font-medium rounded-none border-2 transition-all ${isActive
-                                ? "bg-primary text-on-primary border-primary shadow-[2px_2px_0px_var(--color-foreground)] -translate-y-[2px]"
-                                : "bg-transparent text-foreground-secondary border-transparent hover:border-foreground hover:text-foreground hover:bg-background-tertiary"
+                            className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all ${isActive
+                                ? "bg-primary text-on-primary shadow-md"
+                                : "bg-transparent text-foreground-secondary hover:text-foreground hover:bg-background-tertiary"
                                 }`}
                         >
                             <Icon className={`mr-3 h-5 w-5 ${isActive ? "text-on-primary" : "text-foreground-muted"}`} />

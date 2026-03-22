@@ -12,10 +12,24 @@ import {
   Wallet
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend
+} from "recharts";
 
 export default function DashboardPage() {
   const { user } = useUser();
   const stats = useQuery(api.dashboard.getDashboardStats);
+  const analytics = useQuery(api.dashboard.getAdvancedAnalytics);
 
   return (
     <div className="min-h-screen bg-background">
@@ -137,6 +151,85 @@ export default function DashboardPage() {
                 </a>
               </div>
             </div>
+
+            {/* Recharts Analytics Section */}
+            {analytics && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+                {/* Revenue Chart */}
+                <div className="card p-6 shadow-sm">
+                  <h2 className="text-lg font-semibold text-foreground mb-6">Évolution des Revenus (6 derniers mois)</h2>
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={analytics.revenueHistory}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
+                        <XAxis
+                          dataKey="name"
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: 'var(--color-foreground-secondary)', fontSize: 12 }}
+                          dy={10}
+                        />
+                        <YAxis
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: 'var(--color-foreground-secondary)', fontSize: 12 }}
+                          tickFormatter={(value) => `${value} TND`}
+                          dx={-10}
+                        />
+                        <Tooltip
+                          contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                          formatter={(value: number | string | readonly (number | string)[] | undefined) => [`${value} TND`, 'Revenus']}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="revenue"
+                          stroke="var(--color-primary-500)"
+                          strokeWidth={3}
+                          dot={{ r: 4, fill: "var(--color-primary-500)", strokeWidth: 2, stroke: "#fff" }}
+                          activeDot={{ r: 6 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Discipline Distribution */}
+                <div className="card p-6 shadow-sm">
+                  <h2 className="text-lg font-semibold text-foreground mb-6">Répartition par Discipline</h2>
+                  <div className="h-[300px] w-full flex items-center justify-center">
+                    {analytics.disciplineDistribution.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={analytics.disciplineDistribution}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={80}
+                            paddingAngle={5}
+                            dataKey="count"
+                          >
+                            {analytics.disciplineDistribution.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                            formatter={(value: number | string | readonly (number | string)[] | undefined) => [`${value} adhérents`, 'Inscrits']}
+                          />
+                          <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="text-foreground-secondary flex flex-col items-center">
+                        <Activity className="h-10 w-10 mb-2 opacity-50" />
+                        <p>Aucune donnée disponible</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </main>

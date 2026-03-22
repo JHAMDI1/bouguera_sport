@@ -17,6 +17,8 @@ import { DataTable, type Column } from "@/components/DataTable";
 import { StatusBadge } from "@/components/StatusBadge";
 import { FormModal } from "@/components/FormModal";
 import { FormInput } from "@/components/FormInput";
+import { Avatar } from "@/components/Avatar";
+import { DropdownMenu, DropdownItem } from "@/components/DropdownMenu";
 
 export default function CoachesPage() {
   const { coaches, isSubmitting, createCoach, updateCoach, deleteCoach, toggleStatus, modalProps } = useCoaches();
@@ -63,9 +65,7 @@ export default function CoachesPage() {
       header: "Coach",
       accessor: (coach) => (
         <div className="flex items-center">
-          <div className="h-10 w-10 rounded-none bg-primary-subtle flex items-center justify-center">
-            <UserCircle className="h-6 w-6 text-primary-text" />
-          </div>
+          <Avatar name={coach.fullName} />
           <div className="ml-4 text-sm font-medium text-foreground">{coach.fullName}</div>
         </div>
       )
@@ -100,12 +100,15 @@ export default function CoachesPage() {
       header: "Actions",
       className: "text-right",
       accessor: (coach) => (
-        <button
-          onClick={() => openEditModal(coach)}
-          className="text-primary-text hover:text-primary-active transition-colors p-2"
-        >
-          <Edit className="h-4 w-4" />
-        </button>
+        <DropdownMenu>
+          <DropdownItem icon={<Edit />} onClick={() => openEditModal(coach)}>
+            Modifier
+          </DropdownItem>
+          {/* Supprimer via la modale d'édition, ou directement ici */}
+          <DropdownItem danger icon={<Trash2 />} onClick={() => deleteCoach(coach, () => { })}>
+            Supprimer
+          </DropdownItem>
+        </DropdownMenu>
       )
     }
   ];
@@ -141,7 +144,6 @@ export default function CoachesPage() {
         onSubmit={handleSubmitCreate(onCreateSubmit)}
         submitText="Créer"
       >
-        <FormInput label="ID Clerk" registration={registerCreate("clerkId")} error={createErrors.clerkId} placeholder="user_xxx" disabled={isSubmitting} />
         <FormInput label="Email" registration={registerCreate("email")} error={createErrors.email} type="email" placeholder="coach@example.com" disabled={isSubmitting} />
         <FormInput label="Nom complet" registration={registerCreate("fullName")} error={createErrors.fullName} placeholder="John Doe" disabled={isSubmitting} />
         <FormInput label="Téléphone" registration={registerCreate("phone")} type="tel" placeholder="+216 XX XXX XXX" disabled={isSubmitting} />

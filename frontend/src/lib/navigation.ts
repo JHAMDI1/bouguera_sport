@@ -6,6 +6,7 @@ import {
     Calendar,
     Activity,
     UserCircle,
+    Settings,
 } from "lucide-react";
 
 export const navigationLinks = [
@@ -18,4 +19,5 @@ export const navigationLinks = [
     { name: "Planning", href: "/schedule", icon: Calendar },
     { name: "Dépenses", href: "/expenses", icon: DollarSign },
     { name: "Disciplines", href: "/disciplines", icon: Activity },
+    { name: "Paramètres", href: "/settings", icon: Settings },
 ];

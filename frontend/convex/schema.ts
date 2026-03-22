@@ -6,7 +6,7 @@ import type { Id } from "./_generated/dataModel";
 export default defineSchema({
   // Table users (SuperAdmin & Coachs)
   users: defineTable({
-    clerkId: v.string(),
+    clerkId: v.optional(v.string()), // rendu optionnel pour créer des coachs en attente
     email: v.string(),
     role: v.union(
       v.literal("superadmin"),
@@ -16,6 +16,7 @@ export default defineSchema({
     ),
     fullName: v.string(),
     phone: v.optional(v.string()),
+    photoUrl: v.optional(v.string()),
     isActive: v.boolean(),
     createdAt: v.number(),
   })
@@ -59,6 +60,7 @@ export default defineSchema({
 
   // Table members (Adhérents)
   members: defineTable({
+    userId: v.optional(v.string()), // Lier avec Clerk (Portail Adhérent)
     firstName: v.string(),
     lastName: v.string(),
     familyId: v.optional(v.id("families")),
@@ -68,6 +70,7 @@ export default defineSchema({
     emergencyContactName: v.optional(v.string()),
     emergencyContactPhone: v.optional(v.string()),
     medicalCertificateExpiry: v.optional(v.number()),
+    medicalCertificateUrl: v.optional(v.string()),
     address: v.optional(v.string()),
     photoUrl: v.optional(v.string()),
     registrationDate: v.number(),
@@ -76,6 +79,7 @@ export default defineSchema({
   })
     .index("by_familyId", ["familyId"])
     .index("by_lastName", ["lastName"])
+    .index("by_userId", ["userId"])
     .index("by_isActive", ["isActive"]),
 
   // Table memberSubscriptions (Inscription aux Disciplines & Groupes)
@@ -160,6 +164,18 @@ export default defineSchema({
     .index("by_groupId", ["groupId"])
     .index("by_coachId", ["coachId"])
     .index("by_startTime", ["startTime"]),
+
+  // Table settings (Configuration SaaS globale)
+  settings: defineTable({
+    clubName: v.string(),
+    currency: v.string(),
+    contactEmail: v.string(),
+    contactPhone: v.optional(v.string()),
+    taxRate: v.number(),
+    logoUrl: v.optional(v.string()),
+    address: v.optional(v.string()),
+    updatedAt: v.number(),
+  }),
 
   // Table auditLog (Journal d'activité)
   auditLog: defineTable({

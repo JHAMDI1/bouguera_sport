@@ -19,6 +19,8 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { FormModal } from "@/components/FormModal";
 import { FormInput } from "@/components/FormInput";
 import { SearchInput } from "@/components/SearchInput";
+import { Avatar } from "@/components/Avatar";
+import { DropdownMenu, DropdownItem } from "@/components/DropdownMenu";
 
 export default function FamiliesPage() {
   const { families, isSubmitting, createFamily, updateFamily, deleteFamily, toggleStatus, modalProps } = useFamilies();
@@ -82,7 +84,7 @@ export default function FamiliesPage() {
       header: "Famille",
       accessor: (family) => (
         <div className="flex items-center">
-          <Users className="h-5 w-5 text-primary-text mr-2" />
+          <Avatar name={family.familyName} size="sm" className="mr-3" />
           <span className="text-sm font-medium text-foreground">{family.familyName}</span>
         </div>
       )
@@ -128,13 +130,14 @@ export default function FamiliesPage() {
     {
       header: "Actions",
       accessor: (family) => (
-        <button
-          onClick={() => handleEdit(family)}
-          disabled={isSubmitting}
-          className="text-primary-text hover:text-primary-active transition-colors disabled:opacity-50 p-2"
-        >
-          <Edit className="h-4 w-4" />
-        </button>
+        <DropdownMenu>
+          <DropdownItem icon={<Edit />} onClick={() => handleEdit(family)}>
+            Modifier
+          </DropdownItem>
+          <DropdownItem danger icon={<Trash2 />} onClick={() => deleteFamily(family, () => { })}>
+            Supprimer
+          </DropdownItem>
+        </DropdownMenu>
       )
     }
   ];

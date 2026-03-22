@@ -6,6 +6,8 @@ export const memberSchema = z.object({
     lastName: z.string().min(2, "Nom requis"),
     phone: z.string().optional(),
     gender: z.enum(["male", "female", "other"]),
+    photoUrl: z.string().optional(),
+    medicalCertificateUrl: z.string().optional(),
 });
 
 export const updateMemberSchema = memberSchema.extend({
@@ -69,7 +71,6 @@ export type UpdateGroupFormData = z.infer<typeof updateGroupSchema>;
 
 // --- Coaches ---
 export const coachSchema = z.object({
-    clerkId: z.string().min(1, "ID Clerk requis"),
     email: z.string().email("Email invalide"),
     fullName: z.string().min(2, "Nom complet requis"),
     phone: z.string().optional(),

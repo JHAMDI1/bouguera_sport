@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { SkeletonTable } from "./Skeleton";
 
 export interface Column<T> {
     header: string;
@@ -69,7 +70,7 @@ export function DataTable<T>({
 
             {/* États de chargement et liste vide */}
             {isLoading && !data && (
-                <div className="text-center py-8 text-foreground-secondary">Chargement...</div>
+                <SkeletonTable cols={columns.length} rows={5} />
             )}
             {!isLoading && data?.length === 0 && (
                 <div className="text-center py-8 text-foreground-secondary">{emptyMessage}</div>

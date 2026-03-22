@@ -8,17 +8,20 @@
  * @module
  */
 
+import type * as auth from "../auth.js";
 import type * as coaches from "../coaches.js";
 import type * as cron from "../cron.js";
 import type * as crons from "../crons.js";
 import type * as dashboard from "../dashboard.js";
 import type * as disciplines from "../disciplines.js";
 import type * as families from "../families.js";
+import type * as files from "../files.js";
 import type * as members from "../members.js";
 import type * as mutations from "../mutations.js";
 import type * as payments from "../payments.js";
 import type * as seed from "../seed.js";
 import type * as sessions from "../sessions.js";
+import type * as settings from "../settings.js";
 import type * as users from "../users.js";
 
 import type {
@@ -28,17 +31,20 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  auth: typeof auth;
   coaches: typeof coaches;
   cron: typeof cron;
   crons: typeof crons;
   dashboard: typeof dashboard;
   disciplines: typeof disciplines;
   families: typeof families;
+  files: typeof files;
   members: typeof members;
   mutations: typeof mutations;
   payments: typeof payments;
   seed: typeof seed;
   sessions: typeof sessions;
+  settings: typeof settings;
   users: typeof users;
 }>;
 

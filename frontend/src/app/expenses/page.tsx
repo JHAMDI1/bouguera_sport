@@ -12,6 +12,8 @@ import { DataTable, type Column } from "@/components/DataTable";
 import { FormModal } from "@/components/FormModal";
 import { FormInput } from "@/components/FormInput";
 import { FormSelect } from "@/components/FormSelect";
+import { Avatar } from "@/components/Avatar";
+import { DropdownMenu, DropdownItem } from "@/components/DropdownMenu";
 
 export default function ExpensesPage() {
   const { expenses, categories, isSubmitting, createExpense, updateExpense, deleteExpense, getCategoryName, getRecordedByName, modalProps } = useExpenses();
@@ -119,22 +121,25 @@ export default function ExpensesPage() {
     },
     {
       header: "Enregistré par",
-      accessor: (expense) => (
-        <span className="text-sm text-foreground-secondary">
-          {getRecordedByName(expense.recordedBy)}
-        </span>
-      )
+      accessor: (expense) => {
+        const recordedBy = getRecordedByName(expense.recordedBy);
+        return (
+          <div className="flex items-center text-sm text-foreground-secondary">
+            <Avatar name={recordedBy} size="sm" className="mr-2" />
+            {recordedBy}
+          </div>
+        );
+      }
     },
     {
       header: "Actions",
       className: "text-right",
       accessor: (expense) => (
-        <button
-          onClick={() => handleEdit(expense)}
-          className="text-primary-text hover:text-primary-active transition-colors p-2"
-        >
-          <Edit className="h-4 w-4" />
-        </button>
+        <DropdownMenu>
+          <DropdownItem icon={<Edit />} onClick={() => handleEdit(expense)}>
+            Modifier
+          </DropdownItem>
+        </DropdownMenu>
       )
     }
   ];
