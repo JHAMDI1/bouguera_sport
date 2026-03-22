@@ -37,7 +37,6 @@ export const checkExpiredMedicalCertificates = internalMutation({
       }
 
       await ctx.db.insert("auditLog", {
-        userId: "system" as Id<"users">,
         action: "MEDICAL_CERTIFICATE_EXPIRING",
         entityType: "member",
         entityId: member._id,
@@ -80,7 +79,6 @@ export const checkLatePayments = internalMutation({
       if (payments.length === 0) {
         latePaymentsCount++;
         await ctx.db.insert("auditLog", {
-          userId: "system" as Id<"users">,
           action: "LATE_PAYMENT",
           entityType: "member",
           entityId: member._id,

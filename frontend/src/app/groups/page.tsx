@@ -1,107 +1,58 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { Users, Plus, Edit, X, Check, Calendar, UserCircle, Loader2 } from "lucide-react";
+import { Users, Plus, Edit, Calendar, UserCircle } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useToastHelpers } from "@/components/Toast";
-import { ConfirmModal, useConfirmModal } from "@/components/ConfirmModal";
-
-const groupSchema = z.object({
-  name: z.string().min(2, "Nom du groupe requis"),
-  disciplineId: z.string().min(1, "Discipline requise"),
-  coachId: z.string().min(1, "Coach requis"),
-  schedule: z.string().optional(),
-  maxCapacity: z.number().min(1, "Capacité minimale de 1"),
-});
-
-const updateGroupSchema = z.object({
-  name: z.string().min(2, "Nom du groupe requis"),
-  disciplineId: z.string().min(1, "Discipline requise"),
-  coachId: z.string().min(1, "Coach requis"),
-  schedule: z.string().optional(),
-  maxCapacity: z.number().min(1, "Capacité minimale de 1"),
-  isActive: z.boolean(),
-});
-
-type GroupFormData = z.infer<typeof groupSchema>;
-type UpdateGroupFormData = z.infer<typeof updateGroupSchema>;
+import { ConfirmModal } from "@/components/ConfirmModal";
+import {
+  groupSchema,
+  updateGroupSchema,
+  type GroupFormData,
+  type UpdateGroupFormData,
+} from "@/schemas";
+import { useGroups } from "@/features/groups/useGroups";
+import { PageHeader } from "@/components/PageHeader";
+import { DataTable, type Column } from "@/components/DataTable";
+import { StatusBadge } from "@/components/StatusBadge";
+import { FormModal } from "@/components/FormModal";
+import { FormInput } from "@/components/FormInput";
+import { FormSelect } from "@/components/FormSelect";
+import { getDisciplineName, getCoachName } from "@/lib/lookups";
 
 export default function GroupsPage() {
-  const groups = useQuery(api.disciplines.getGroups, {});
-  const disciplines = useQuery(api.disciplines.getDisciplines, {});
-  const coaches = useQuery(api.users.getUsers, { role: "coach" });
-  const createGroup = useMutation(api.coaches.createGroup);
-  const updateGroup = useMutation(api.coaches.updateGroup);
-  const toast = useToastHelpers();
-  const { confirm, modalProps } = useConfirmModal();
+  const { groups, disciplines, coaches, isSubmitting, createGroup, updateGroup, toggleStatus, modalProps } = useGroups();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<any>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register: registerCreate,
     handleSubmit: handleSubmitCreate,
     reset: resetCreate,
     formState: { errors: createErrors },
-  } = useForm<GroupFormData>({
-    resolver: zodResolver(groupSchema),
-    defaultValues: {
-      maxCapacity: 20,
-    },
-  });
+  } = useForm<GroupFormData>({ resolver: zodResolver(groupSchema), defaultValues: { maxCapacity: 20 } });
 
   const {
     register: registerUpdate,
     handleSubmit: handleSubmitUpdate,
     reset: resetUpdate,
     formState: { errors: updateErrors },
-  } = useForm<UpdateGroupFormData>({
-    resolver: zodResolver(updateGroupSchema),
-  });
+  } = useForm<UpdateGroupFormData>({ resolver: zodResolver(updateGroupSchema) });
 
   const onCreateSubmit = async (data: GroupFormData) => {
-    setIsSubmitting(true);
-    try {
-      await createGroup({
-        ...data,
-        disciplineId: data.disciplineId as any,
-        coachId: data.coachId as any,
-      });
-      toast.success("Groupe créé", `${data.name} a été créé avec succès`);
+    await createGroup(data, () => {
       setIsCreateModalOpen(false);
       resetCreate();
-    } catch (error) {
-      console.error("Erreur création groupe:", error);
-      toast.error("Erreur", "Impossible de créer le groupe");
-    } finally {
-      setIsSubmitting(false);
-    }
+    });
   };
 
   const onUpdateSubmit = async (data: UpdateGroupFormData) => {
     if (!editingGroup) return;
-    setIsSubmitting(true);
-    try {
-      await updateGroup({
-        id: editingGroup._id,
-        ...data,
-        disciplineId: data.disciplineId as any,
-        coachId: data.coachId as any,
-      });
-      toast.success("Groupe mis à jour", "Les informations ont été modifiées avec succès");
+    await updateGroup(editingGroup._id, data, () => {
       setEditingGroup(null);
       resetUpdate();
-    } catch (error) {
-      console.error("Erreur mise à jour groupe:", error);
-      toast.error("Erreur", "Impossible de mettre à jour le groupe");
-    } finally {
-      setIsSubmitting(false);
-    }
+    });
   };
 
   const openEditModal = (group: any) => {
@@ -116,416 +67,133 @@ export default function GroupsPage() {
     });
   };
 
-  const getDisciplineName = (id: string) => {
-    return disciplines?.find((d) => d._id === id)?.name || "Inconnu";
-  };
-
-  const getCoachName = (id: string) => {
-    return coaches?.find((c) => c._id === id)?.fullName || "Inconnu";
-  };
+  const columns: Column<any>[] = [
+    {
+      header: "Groupe",
+      accessor: (group) => <span className="text-sm font-medium text-foreground">{group.name}</span>
+    },
+    {
+      header: "Discipline",
+      accessor: (group) => <span className="badge badge-info">{getDisciplineName(disciplines, group.disciplineId)}</span>
+    },
+    {
+      header: "Coach",
+      accessor: (group) => (
+        <div className="flex items-center text-sm text-foreground">
+          <UserCircle className="h-4 w-4 mr-1 text-foreground-muted" />
+          {getCoachName(coaches, group.coachId)}
+        </div>
+      )
+    },
+    {
+      header: "Horaires",
+      accessor: (group) => (
+        <div className="flex items-center text-sm text-foreground-secondary">
+          <Calendar className="h-4 w-4 mr-1 text-foreground-muted" />
+          {group.schedule || "Non défini"}
+        </div>
+      )
+    },
+    {
+      header: "Capacité",
+      accessor: (group) => <span className="text-sm text-foreground">{group.maxCapacity} places</span>
+    },
+    {
+      header: "Statut",
+      accessor: (group) => (
+        <StatusBadge
+          status={group.isActive}
+          onClick={() => toggleStatus(group)}
+          disabled={isSubmitting}
+        />
+      )
+    },
+    {
+      header: "Actions",
+      className: "text-right",
+      accessor: (group) => (
+        <button
+          onClick={() => openEditModal(group)}
+          className="text-primary-text hover:text-primary-active transition-colors p-2"
+        >
+          <Edit className="h-4 w-4" />
+        </button>
+      )
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Users className="h-6 w-6 text-indigo-600 mr-3" />
-              <h1 className="text-2xl font-bold text-gray-900">
-                Gestion des Groupes
-              </h1>
-            </div>
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center hover:bg-indigo-700 transition-colors"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Nouveau Groupe
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background">
+      <PageHeader
+        title="Gestion des Groupes"
+        icon={<Users className="h-6 w-6" />}
+        action={
+          <button onClick={() => setIsCreateModalOpen(true)} className="btn btn-primary">
+            <Plus className="h-4 w-4 mr-2" />
+            Nouveau Groupe
+          </button>
+        }
+      />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Groupe
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Discipline
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Coach
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Horaires
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Capacité
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Statut
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {groups?.map((group) => (
-                <tr key={group._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {group.name}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">
-                      {getDisciplineName(group.disciplineId)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center text-sm text-gray-900">
-                      <UserCircle className="h-4 w-4 mr-1 text-gray-400" />
-                      {getCoachName(group.coachId)}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Calendar className="h-4 w-4 mr-1 text-gray-400" />
-                      {group.schedule || "Non défini"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {group.maxCapacity} places
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full ${
-                        group.isActive
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {group.isActive ? "Actif" : "Inactif"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <button
-                      onClick={() => openEditModal(group)}
-                      className="text-indigo-600 hover:text-indigo-900"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {!groups && (
-            <div className="text-center py-8 text-gray-500">Chargement...</div>
-          )}
-          {groups?.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              Aucun groupe trouvé
-            </div>
-          )}
-        </div>
+        <DataTable
+          data={groups}
+          columns={columns}
+          keyExtractor={(g) => g._id}
+          isLoading={!groups}
+          emptyMessage="Aucun groupe trouvé"
+        />
       </main>
 
-      {/* Modal Création */}
-      {isCreateModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900">
-                Nouveau Groupe
-              </h2>
-              <button
-                onClick={() => setIsCreateModalOpen(false)}
-                disabled={isSubmitting}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <form onSubmit={handleSubmitCreate(onCreateSubmit)}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Nom du groupe
-                  </label>
-                  <input
-                    {...registerCreate("name")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
-                    placeholder="Taekwondo - Enfants 8-12 ans"
-                    disabled={isSubmitting}
-                  />
-                  {createErrors.name && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {createErrors.name.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Discipline
-                  </label>
-                  <select
-                    {...registerCreate("disciplineId")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
-                    disabled={isSubmitting}
-                  >
-                    <option value="">Sélectionner une discipline</option>
-                    {disciplines?.map((d) => (
-                      <option key={d._id} value={d._id}>
-                        {d.name}
-                      </option>
-                    ))}
-                  </select>
-                  {createErrors.disciplineId && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {createErrors.disciplineId.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Coach
-                  </label>
-                  <select
-                    {...registerCreate("coachId")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
-                    disabled={isSubmitting}
-                  >
-                    <option value="">Sélectionner un coach</option>
-                    {coaches?.map((c) => (
-                      <option key={c._id} value={c._id}>
-                        {c.fullName}
-                      </option>
-                    ))}
-                  </select>
-                  {createErrors.coachId && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {createErrors.coachId.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Horaires
-                  </label>
-                  <input
-                    {...registerCreate("schedule")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
-                    placeholder="Lundi/Mercredi 18h-20h"
-                    disabled={isSubmitting}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Capacité maximale
-                  </label>
-                  <input
-                    {...registerCreate("maxCapacity", { valueAsNumber: true })}
-                    type="number"
-                    min={1}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
-                    disabled={isSubmitting}
-                  />
-                  {createErrors.maxCapacity && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {createErrors.maxCapacity.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="mt-6 flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  disabled={isSubmitting}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center disabled:opacity-50"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Création...
-                    </>
-                  ) : (
-                    <>
-                      <Check className="h-4 w-4 mr-2" />
-                      Créer
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <FormModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        title="Nouveau Groupe"
+        isSubmitting={isSubmitting}
+        onSubmit={handleSubmitCreate(onCreateSubmit)}
+        submitText="Créer"
+      >
+        <FormInput label="Nom du groupe" registration={registerCreate("name")} error={createErrors.name} placeholder="Taekwondo - Enfants 8-12 ans" disabled={isSubmitting} />
+        <FormSelect label="Discipline" registration={registerCreate("disciplineId")} error={createErrors.disciplineId} disabled={isSubmitting}>
+          <option value="">Sélectionner une discipline</option>
+          {disciplines?.map((d) => <option key={d._id} value={d._id}>{d.name}</option>)}
+        </FormSelect>
+        <FormSelect label="Coach" registration={registerCreate("coachId")} error={createErrors.coachId} disabled={isSubmitting}>
+          <option value="">Sélectionner un coach</option>
+          {coaches?.map((c) => <option key={c._id} value={c._id}>{c.fullName}</option>)}
+        </FormSelect>
+        <FormInput label="Horaires" registration={registerCreate("schedule")} placeholder="Lundi/Mercredi 18h-20h" disabled={isSubmitting} />
+        <FormInput label="Capacité maximale" registration={registerCreate("maxCapacity", { valueAsNumber: true })} error={createErrors.maxCapacity} type="number" min={1} inputMode="numeric" disabled={isSubmitting} />
+      </FormModal>
 
-      {/* Modal Édition */}
-      {editingGroup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900">
-                Modifier Groupe
-              </h2>
-              <button
-                onClick={() => setEditingGroup(null)}
-                disabled={isSubmitting}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <form onSubmit={handleSubmitUpdate(onUpdateSubmit)}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Nom du groupe
-                  </label>
-                  <input
-                    {...registerUpdate("name")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
-                    disabled={isSubmitting}
-                  />
-                  {updateErrors.name && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {updateErrors.name.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Discipline
-                  </label>
-                  <select
-                    {...registerUpdate("disciplineId")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
-                    disabled={isSubmitting}
-                  >
-                    <option value="">Sélectionner une discipline</option>
-                    {disciplines?.map((d) => (
-                      <option key={d._id} value={d._id}>
-                        {d.name}
-                      </option>
-                    ))}
-                  </select>
-                  {updateErrors.disciplineId && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {updateErrors.disciplineId.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Coach
-                  </label>
-                  <select
-                    {...registerUpdate("coachId")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
-                    disabled={isSubmitting}
-                  >
-                    <option value="">Sélectionner un coach</option>
-                    {coaches?.map((c) => (
-                      <option key={c._id} value={c._id}>
-                        {c.fullName}
-                      </option>
-                    ))}
-                  </select>
-                  {updateErrors.coachId && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {updateErrors.coachId.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Horaires
-                  </label>
-                  <input
-                    {...registerUpdate("schedule")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
-                    disabled={isSubmitting}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Capacité maximale
-                  </label>
-                  <input
-                    {...registerUpdate("maxCapacity", { valueAsNumber: true })}
-                    type="number"
-                    min={1}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
-                    disabled={isSubmitting}
-                  />
-                  {updateErrors.maxCapacity && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {updateErrors.maxCapacity.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="flex items-center">
-                    <input
-                      {...registerUpdate("isActive")}
-                      type="checkbox"
-                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                      disabled={isSubmitting}
-                    />
-                    <span className="ml-2 text-sm text-gray-700">Actif</span>
-                  </label>
-                </div>
-              </div>
-              <div className="mt-6 flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setEditingGroup(null)}
-                  disabled={isSubmitting}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center disabled:opacity-50"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Mise à jour...
-                    </>
-                  ) : (
-                    <>
-                      <Check className="h-4 w-4 mr-2" />
-                      Mettre à jour
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <FormModal
+        isOpen={!!editingGroup}
+        onClose={() => setEditingGroup(null)}
+        title="Modifier Groupe"
+        isSubmitting={isSubmitting}
+        onSubmit={handleSubmitUpdate(onUpdateSubmit)}
+        submitText="Mettre à jour"
+      >
+        <FormInput label="Nom du groupe" registration={registerUpdate("name")} error={updateErrors.name} disabled={isSubmitting} />
+        <FormSelect label="Discipline" registration={registerUpdate("disciplineId")} error={updateErrors.disciplineId} disabled={isSubmitting}>
+          <option value="">Sélectionner une discipline</option>
+          {disciplines?.map((d) => <option key={d._id} value={d._id}>{d.name}</option>)}
+        </FormSelect>
+        <FormSelect label="Coach" registration={registerUpdate("coachId")} error={updateErrors.coachId} disabled={isSubmitting}>
+          <option value="">Sélectionner un coach</option>
+          {coaches?.map((c) => <option key={c._id} value={c._id}>{c.fullName}</option>)}
+        </FormSelect>
+        <FormInput label="Horaires" registration={registerUpdate("schedule")} disabled={isSubmitting} />
+        <FormInput label="Capacité maximale" registration={registerUpdate("maxCapacity", { valueAsNumber: true })} error={updateErrors.maxCapacity} type="number" min={1} inputMode="numeric" disabled={isSubmitting} />
 
-      {/* Confirm Modal */}
+        <div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input {...registerUpdate("isActive")} type="checkbox" className="rounded-none border-2 border-border text-primary-text" disabled={isSubmitting} />
+            <span className="text-sm text-foreground-secondary">Actif</span>
+          </label>
+        </div>
+      </FormModal>
+
       <ConfirmModal {...modalProps} />
     </div>
   );

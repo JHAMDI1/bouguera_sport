@@ -68,31 +68,31 @@ Merci pour votre paiement!
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-lg max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-none-none w-full max-w-lg max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b bg-gray-50">
           <div className="flex items-center">
-            <Receipt className="h-5 w-5 text-indigo-600 mr-2" />
+            <Receipt className="h-5 w-5 text-primary-text mr-2" />
             <h2 className="text-lg font-bold text-gray-900">Reçu {data.receiptNumber}</h2>
           </div>
           <div className="flex items-center space-x-2">
             <button
               onClick={handleDownload}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded"
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-none"
               title="Télécharger"
             >
               <Download className="h-4 w-4" />
             </button>
             <button
               onClick={handlePrint}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded"
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-none"
               title="Imprimer"
             >
               <Printer className="h-4 w-4" />
             </button>
             <button
               onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded"
+              className="p-2 text-gray-500 hover:text-gray-600 hover:bg-gray-200 rounded-none"
             >
               <X className="h-5 w-5" />
             </button>
@@ -105,7 +105,7 @@ Merci pour votre paiement!
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-gray-900">CLUB SPORTIF</h1>
             <p className="text-sm text-gray-600">Reçu de Paiement</p>
-            <div className="mt-2 inline-block px-3 py-1 bg-indigo-100 text-indigo-800 text-sm font-medium rounded">
+            <div className="mt-2 inline-block px-3 py-1 bg-indigo-100 text-indigo-800 text-sm font-medium rounded-none">
               N° {data.receiptNumber}
             </div>
           </div>
@@ -116,7 +116,7 @@ Merci pour votre paiement!
           </div>
 
           {/* Member Info */}
-          <div className="border-t border-b border-gray-200 py-4 mb-4">
+          <div className="border-t border-b border-2 border-foreground py-4 mb-4">
             <h3 className="font-semibold text-gray-900 mb-2">Adhérent</h3>
             <p className="text-gray-800">
               <span className="font-medium">Nom:</span> {data.memberName}
@@ -133,17 +133,17 @@ Merci pour votre paiement!
             <h3 className="font-semibold text-gray-900 mb-3">Détails du Paiement</h3>
             <table className="w-full text-sm">
               <tbody>
-                <tr className="border-b border-gray-100">
+                <tr className="border-b border-2 border-foreground">
                   <td className="py-2 text-gray-600">Période</td>
                   <td className="py-2 text-right font-medium">{data.month} {data.year}</td>
                 </tr>
-                <tr className="border-b border-gray-100">
+                <tr className="border-b border-2 border-foreground">
                   <td className="py-2 text-gray-600">Méthode de paiement</td>
                   <td className="py-2 text-right font-medium">Espèces</td>
                 </tr>
                 <tr className="bg-gray-50">
                   <td className="py-3 text-gray-900 font-semibold">Montant Total</td>
-                  <td className="py-3 text-right font-bold text-lg text-indigo-600">
+                  <td className="py-3 text-right font-bold text-lg text-primary-text">
                     {data.amount.toLocaleString("fr-FR")} TND
                   </td>
                 </tr>
@@ -157,20 +157,20 @@ Merci pour votre paiement!
           </div>
 
           {/* Signature Area */}
-          <div className="mt-8 pt-4 border-t border-gray-200">
+          <div className="mt-8 pt-4 border-t border-2 border-foreground">
             <div className="flex justify-between items-end">
               <div>
-                <p className="text-xs text-gray-500 mb-1">Signature du Caissier</p>
+                <p className="text-xs text-gray-700 mb-1">Signature du Caissier</p>
                 <div className="w-32 h-16 border-b border-gray-400"></div>
               </div>
               <div className="text-center">
-                <p className="text-xs text-gray-500">Cachet du Club</p>
+                <p className="text-xs text-gray-700">Cachet du Club</p>
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="mt-8 text-center text-xs text-gray-500">
+          <div className="mt-8 text-center text-xs text-gray-700">
             <p>Merci pour votre paiement!</p>
             <p className="mt-1">Ce reçu est une preuve de paiement. Veuillez le conserver.</p>
           </div>

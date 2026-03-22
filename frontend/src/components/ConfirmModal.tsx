@@ -42,9 +42,9 @@ export function ConfirmModal({
       confirmBtn: "bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500",
     },
     info: {
-      icon: <CheckCircle className="h-6 w-6 text-blue-600" />,
+      icon: <CheckCircle className="h-6 w-6 text-primary-text" />,
       iconBg: "bg-blue-100",
-      confirmBtn: "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500",
+      confirmBtn: "bg-primary text-black hover:bg-primary-hover hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_var(--color-foreground)] transition-all focus:ring-blue-500",
     },
     success: {
       icon: <CheckCircle className="h-6 w-6 text-green-600" />,
@@ -66,11 +66,11 @@ export function ConfirmModal({
 
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div className="relative bg-white rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] max-w-md w-full">
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-600 transition-colors"
             disabled={isLoading}
           >
             <X className="h-5 w-5" />
@@ -79,7 +79,7 @@ export function ConfirmModal({
           <div className="p-6">
             {/* Icon */}
             <div
-              className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full ${style.iconBg} mb-4`}
+              className={`mx-auto flex h-12 w-12 items-center justify-center rounded-none-none ${style.iconBg} mb-4`}
             >
               {style.icon}
             </div>
@@ -98,14 +98,14 @@ export function ConfirmModal({
               <button
                 onClick={onClose}
                 disabled={isLoading}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium transition-colors disabled:opacity-50"
+                className="px-4 py-2 border-2 border-foreground border-2 border-foreground rounded-none-none text-gray-700 hover:bg-gray-50 font-medium transition-colors disabled:opacity-50"
               >
                 {cancelText}
               </button>
               <button
                 onClick={onConfirm}
                 disabled={isLoading}
-                className={`px-4 py-2 rounded-md text-white font-medium transition-colors disabled:opacity-50 ${style.confirmBtn}`}
+                className={`px-4 py-2 rounded-none-none text-white font-medium transition-colors disabled:opacity-50 ${style.confirmBtn}`}
               >
                 {isLoading ? (
                   <span className="flex items-center">

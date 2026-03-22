@@ -58,14 +58,14 @@ export function FormActions({
         type="button"
         onClick={onCancel}
         disabled={isSubmitting}
-        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+        className="px-4 py-2 border-2 border-foreground border-2 border-foreground rounded-none-none text-gray-700 hover:bg-gray-50 disabled:opacity-50"
       >
         Annuler
       </button>
       <SubmitButton
         isLoading={isSubmitting}
         loadingText={loadingText}
-        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        className="px-4 py-2 bg-primary text-black text-white rounded-none-none hover:bg-primary-hover hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_var(--color-foreground)] transition-all"
       >
         {submitText}
       </SubmitButton>

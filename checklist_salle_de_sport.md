@@ -190,8 +190,8 @@ Les écritures (Mutations) critiques ou complexes passent par l'API Rust qui, en
 - [x] `mutation: createGroup`, `mutation: updateGroup`
 - [x] `mutation: createDiscipline`, `mutation: updateDiscipline`
 - [x] `mutation: createExpense`, `mutation: updateExpense`
-- [ ] ⚠️ **Performances** : la plupart des queries font un **full table scan** (`.collect()` + `.filter()`) au lieu d'utiliser `.withIndex()`
-- [ ] ⚠️ **Audit Log manquant** : seules les mutations `sessions.ts` écrivent dans `auditLog` — les mutations membres, paiements, coachs, familles n'ont **aucun audit**
+- [x] ⚠️ **Performances** : queries optimisées avec `.withIndex()`
+- [x] ⚠️ **Audit Log manquant** : logs ajoutés aux mutations membres, paiements, coachs, familles
 - [ ] ⚠️ **Pas de pagination** : `getMembers`, `getPayments`, `getExpenses` retournent tous les résultats sans limite
 
 ---
@@ -205,7 +205,7 @@ Les écritures (Mutations) critiques ou complexes passent par l'API Rust qui, en
   - [x] Bénéfice net
   - [x] Nombre d'impayés
 - [x] `query: getFinancialReport(month, year)`
-- [ ] `query: getMembersReport` — ⚠️ **ABSENT du code**, listé mais non implémenté
+- [x] `query: getMembersReport` — Implémenté dans `dashboard.ts` avec les abonnements et disciplines
 
 ---
 
@@ -230,15 +230,15 @@ Les écritures (Mutations) critiques ou complexes passent par l'API Rust qui, en
 
 ### Phase 7 : 🔰 Fonctionnalités Avancées (Nice to Have)
 
-- [~] **Jobs planifiés (Convex Cron Jobs)** :
+- [x] **Jobs planifiés (Convex Cron Jobs)** :
   - [x] Fonctions internes écrites (`checkExpiredMedicalCertificates`, `checkLatePayments`)
-  - [ ] ⚠️ **Pas de fichier `convex/crons.ts`** — les cron jobs ne sont **PAS schedulés**, exécutables manuellement uniquement
+  - [x] ⚠️ **Fichier `convex/crons.ts` créé** — les cron jobs sont maintenant **schedulés** (quotidien/mensuel)
 - [x] **Planning des cours** :
   - [x] CRUD Sessions complet (`createSession`, `updateSession`, `deleteSession`)
   - [x] `getWeeklySchedule` pour vue calendrier
   - [x] Page `/schedule` dans le frontend
-- [~] **Impression / Export** :
-  - [~] Génération de PDF : composant `ReceiptPDF.tsx` côté client existe, mais côté Rust le PDF est un **MOCK**
+- [x] **Impression / Export** :
+  - [x] Génération de PDF : composant `ReceiptPDF.tsx` côté client, et en vrai format A6 côté Rust backend (`genpdf`/`printpdf`)
   - [ ] Export CSV des rapports — **non vérifié/non implémenté**
 
 ---
@@ -258,24 +258,24 @@ Les écritures (Mutations) critiques ou complexes passent par l'API Rust qui, en
 ### Phase 9 : 🔧 Corrections Architect Review (21 Mars 2026)
 
 **🔴 Critiques (P0) :**
-- [ ] Connecter les handlers Rust à Convex (`get_convex_client()`) — actuellement tout est mock
-- [ ] Implémenter `verify_clerk_token()` réellement (Clerk JWKS ou API `/verify`)
-- [ ] Supprimer les routes legacy non protégées dans `routes.rs` (`/api/payments`, `/api/expenses`, etc.)
-- [ ] Implémenter la vraie génération PDF (bibliothèque `printpdf` ou `genpdf`)
+- [x] Connecter les handlers Rust à Convex (`get_convex_client()`) — fait pour auth, paiements, dépenses, dashboard
+- [x] Implémenter `verify_clerk_token()` réellement (Clerk JWKS ou API `/verify`) — implémenté via JWKS avec base64
+- [x] Supprimer les routes legacy non protégées dans `routes.rs` (`/api/payments`, `/api/expenses`, etc.)
+- [x] Implémenter la vraie génération PDF (bibliothèque `printpdf` ou `genpdf`)
 
 **🟠 Haute Priorité (P1) :**
-- [ ] Refactorer les queries Convex pour utiliser `.withIndex()` au lieu de `.collect().filter()` (tables: `payments`, `members`, `expenses`, `sessions`, `families`)
-- [ ] Ajouter les audit logs dans toutes les mutations critiques (`createMember`, `createPayment`, `createCoach`, `createFamily`, etc.)
-- [ ] Aligner les rôles entre Convex (`superadmin`/`coach`) et Rust (`SuperAdmin`/`Admin`/`Coach`/`Cashier`)
-- [ ] Configurer `convex/crons.ts` pour scheduler les jobs `checkExpiredMedicalCertificates` et `checkLatePayments`
-- [ ] Corriger le cast `"system" as Id<"users">` dans les cron jobs (utiliser un userId système valide ou `v.optional`)
+- [x] Refactorer les queries Convex pour utiliser `.withIndex()` au lieu de `.collect().filter()` (tables: `payments`, `members`, `expenses`, `sessions`, `families`)
+- [x] Ajouter les audit logs dans toutes les mutations critiques (`createMember`, `createPayment`, `createCoach`, `createFamily`, etc.)
+- [x] Aligner les rôles entre Convex (`superadmin`/`coach`/`admin`/`cashier`) et Rust (`SuperAdmin`/`Admin`/`Coach`/`Cashier`)
+- [x] Configurer `convex/crons.ts` pour scheduler les jobs `checkExpiredMedicalCertificates` et `checkLatePayments`
+- [x] Corriger le cast `"system" as Id<"users">` dans les cron jobs (champ rendu optionnel)
 
 **🟡 Moyenne Priorité (P2) :**
-- [ ] Écrire les tests unitaires Rust (`actix-web::test`)
+- [x] Écrire les tests unitaires Rust (`actix-web::test`)
 - [ ] Ajouter des tests frontend (composants et pages CRUD)
-- [ ] Ajouter la validation métier dans les mutations Convex (montant > 0, mois 1-12, email unique)
-- [ ] Implémenter `getMembersReport`
-- [ ] Ajouter la pagination dans `getMembers`, `getPayments`, `getExpenses`
+- [x] Ajouter la validation métier dans les mutations Convex (montant > 0, mois 1-12, email unique)
+- [x] Implémenter `getMembersReport`
+- [x] Ajouter la pagination dans `getMembers`, `getPayments`, `getExpenses`
 
 **🟢 Basse Priorité (P3) :**
 - [ ] Implémenter l'export CSV des rapports
