@@ -12,7 +12,7 @@ export default function SignInPage() {
           appearance={{
             elements: {
               rootBox: "mx-auto",
-              card: "shadow-lg rounded-lg",
+              card: "shadow-[4px_4px_0px_var(--color-foreground)] rounded-none-none",
             }
           }}
         />

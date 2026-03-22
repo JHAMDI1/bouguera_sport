@@ -361,3 +361,113 @@ pub async fn create_expense(
         }
     }
 }
+
+// ─── Tests Unitaires ──────────────────────────────────────────────────────────
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_web::{test, web, App};
+
+    fn create_mock_config() -> Config {
+        Config {
+            port: 8080,
+            jwt_secret: "test_secret".to_string(),
+            clerk_secret_key: "test_key".to_string(),
+            clerk_jwks_url: "https://test.clerk.com/.well-known/jwks.json".to_string(),
+            clerk_issuer: "https://test.clerk.com".to_string(),
+            convex_url: "https://test.convex.cloud".to_string(),
+            convex_key: "test_key".to_string(),
+        }
+    }
+
+    #[actix_web::test]
+    async fn test_health_check_ok() {
+        let mut app = test::init_service(App::new().route("/health", web::get().to(health_check))).await;
+        let req = test::TestRequest::get().uri("/health").to_request();
+        let resp = test::call_service(&mut app, req).await;
+        
+        assert!(resp.status().is_success());
+    }
+
+    #[actix_web::test]
+    async fn test_create_payment_invalid_amount() {
+        let config = web::Data::new(create_mock_config());
+        let mut app = test::init_service(
+            App::new()
+                .app_data(config.clone())
+                .route("/payments", web::post().to(create_payment))
+        ).await;
+
+        let payload = CreatePaymentRequest {
+            member_id: Some("member_123".to_string()),
+            family_id: None,
+            amount: -10.0, // Invalid amount
+            month_covered: 5,
+            year_covered: 2026,
+            notes: None,
+        };
+
+        let req = test::TestRequest::post()
+            .uri("/payments")
+            .set_json(&payload)
+            .to_request();
+            
+        let resp = test::call_service(&mut app, req).await;
+        assert_eq!(resp.status(), 400); // Bad Request expected
+    }
+
+    #[actix_web::test]
+    async fn test_create_payment_invalid_month() {
+        let config = web::Data::new(create_mock_config());
+        let mut app = test::init_service(
+            App::new()
+                .app_data(config.clone())
+                .route("/payments", web::post().to(create_payment))
+        ).await;
+
+        let payload = CreatePaymentRequest {
+            member_id: Some("member_123".to_string()),
+            family_id: None,
+            amount: 50.0,
+            month_covered: 13, // Invalid month
+            year_covered: 2026,
+            notes: None,
+        };
+
+        let req = test::TestRequest::post()
+            .uri("/payments")
+            .set_json(&payload)
+            .to_request();
+            
+        let resp = test::call_service(&mut app, req).await;
+        assert_eq!(resp.status(), 400); // Bad Request expected
+    }
+
+    #[actix_web::test]
+    async fn test_create_payment_missing_beneficiary() {
+        let config = web::Data::new(create_mock_config());
+        let mut app = test::init_service(
+            App::new()
+                .app_data(config.clone())
+                .route("/payments", web::post().to(create_payment))
+        ).await;
+
+        let payload = CreatePaymentRequest {
+            member_id: None, // Missing
+            family_id: None, // Missing
+            amount: 50.0,
+            month_covered: 5,
+            year_covered: 2026,
+            notes: None,
+        };
+
+        let req = test::TestRequest::post()
+            .uri("/payments")
+            .set_json(&payload)
+            .to_request();
+            
+        let resp = test::call_service(&mut app, req).await;
+        assert_eq!(resp.status(), 400); // Bad Request expected
+    }
+}

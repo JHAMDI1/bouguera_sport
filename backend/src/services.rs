@@ -3,6 +3,8 @@ use jsonwebtoken::{decode, decode_header, encode, Algorithm, DecodingKey, Encodi
 use serde::{Deserialize, Serialize};
 use actix_web::web;
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
+use printpdf::*;
+use std::io::Cursor;
 
 use crate::config::Config;
 use crate::models::{ReceiptData, User};
@@ -256,18 +258,95 @@ pub fn generate_receipt_number() -> String {
 // ─── Génération PDF reçu ──────────────────────────────────────────────────────
 
 pub fn generate_receipt_pdf(receipt_data: &ReceiptData) -> Result<Vec<u8>, String> {
-    // TODO P0.4: Implémenter avec printpdf ou genpdf
-    // Pour l'instant format minimal valide
-    let mock_pdf = format!(
-        "%PDF-1.4\nReceipt: {}\nMember: {}\nAmount: {:.3} TND\nDate: {}\nPaid by: {}\n%%EOF",
-        receipt_data.receipt_number,
-        receipt_data.member_name,
-        receipt_data.amount,
-        receipt_data.payment_date,
-        receipt_data.received_by
+    // Format A6 (105mm x 148mm) - idéal pour un reçu
+    let (doc, page1, layer1) = PdfDocument::new(
+        "Reçu de Paiement",
+        Mm(105.0),
+        Mm(148.0),
+        "Layer 1",
     );
 
-    Ok(mock_pdf.into_bytes())
+    let current_layer = doc.get_page(page1).get_layer(layer1);
+
+    // Charger les polices intégrées (pas besoin de fichier externe .ttf)
+    let font_regular = doc
+        .add_builtin_font(BuiltinFont::Helvetica)
+        .map_err(|e| format!("Erreur police: {}", e))?;
+    let font_bold = doc
+        .add_builtin_font(BuiltinFont::HelveticaBold)
+        .map_err(|e| format!("Erreur police: {}", e))?;
+
+    // Ajouter le texte du reçu
+    current_layer.use_text("SAHBI SPORT", 18.0, Mm(10.0), Mm(130.0), &font_bold);
+    current_layer.use_text("Reçu de Paiement", 14.0, Mm(10.0), Mm(120.0), &font_bold);
+
+    current_layer.use_text(
+        format!("N° Reçu: {}", receipt_data.receipt_number),
+        10.0,
+        Mm(10.0),
+        Mm(105.0),
+        &font_regular,
+    );
+    current_layer.use_text(
+        format!("Date: {}", receipt_data.payment_date),
+        10.0,
+        Mm(10.0),
+        Mm(95.0),
+        &font_regular,
+    );
+    current_layer.use_text(
+        format!("Adhérent: {}", receipt_data.member_name),
+        10.0,
+        Mm(10.0),
+        Mm(85.0),
+        &font_regular,
+    );
+
+    // Montant mis en valeur
+    current_layer.use_text(
+        format!("Montant payé: {:.3} TND", receipt_data.amount),
+        12.0,
+        Mm(10.0),
+        Mm(70.0),
+        &font_bold,
+    );
+    
+    let end_month = if receipt_data.month.is_empty() {
+        "N/A".to_string()
+    } else {
+        format!("{}/{}", receipt_data.month, receipt_data.year)
+    };
+    current_layer.use_text(
+        format!("Période couverte: {}", end_month),
+        10.0,
+        Mm(10.0),
+        Mm(60.0),
+        &font_regular,
+    );
+
+    current_layer.use_text(
+        format!("Encaissé par: {}", receipt_data.received_by),
+        8.0,
+        Mm(10.0),
+        Mm(40.0),
+        &font_regular,
+    );
+    current_layer.use_text(
+        "Merci de votre confiance !",
+        10.0,
+        Mm(30.0),
+        Mm(20.0),
+        &font_bold,
+    );
+
+    // Générer le buffer PDF
+    let mut buf = std::io::BufWriter::new(Vec::new());
+    doc.save(&mut buf)
+        .map_err(|e| format!("Erreur création PDF: {}", e))?;
+
+    let bytes = buf.into_inner().map_err(|e| format!("Erreur flush PDF: {}", e))?;
+
+    Ok(bytes)
 }
 
 // ─── Client Convex ────────────────────────────────────────────────────────────

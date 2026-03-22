@@ -120,16 +120,16 @@ export default function CoachesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-[4px_4px_0px_var(--color-foreground)] border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <UserCircle className="h-6 w-6 text-blue-600 mr-3" />
+              <UserCircle className="h-6 w-6 text-primary mr-3" />
               <h1 className="text-2xl font-bold text-gray-900">Gestion des Coachs</h1>
             </div>
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center hover:bg-blue-700 transition-colors"
+              className="bg-primary text-black text-white px-4 py-2 rounded-none-none flex items-center hover:bg-primary-hover hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_var(--color-foreground)] transition-all transition-colors"
             >
               <Plus className="h-4 w-4 mr-2" />
               Nouveau Coach
@@ -139,31 +139,31 @@ export default function CoachesPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
+        <div className="bg-white rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] overflow-hidden">
+          <table className="min-w-full divide-y-2-2 divide-foreground">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Coach
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Contact
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Statut
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y-2 divide-foreground">
               {coaches?.map((coach) => (
                 <tr key={coach._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                        <UserCircle className="h-6 w-6 text-blue-600" />
+                      <div className="h-10 w-10 rounded-none-none bg-blue-100 flex items-center justify-center">
+                        <UserCircle className="h-6 w-6 text-primary" />
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
@@ -174,12 +174,12 @@ export default function CoachesPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900 flex items-center">
-                      <Mail className="h-4 w-4 mr-1 text-gray-400" />
+                      <Mail className="h-4 w-4 mr-1 text-gray-500" />
                       {coach.email}
                     </div>
                     {coach.phone && (
-                      <div className="text-sm text-gray-500 flex items-center mt-1">
-                        <Phone className="h-4 w-4 mr-1 text-gray-400" />
+                      <div className="text-sm text-gray-700 flex items-center mt-1">
+                        <Phone className="h-4 w-4 mr-1 text-gray-500" />
                         {coach.phone}
                       </div>
                     )}
@@ -187,7 +187,7 @@ export default function CoachesPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button
                       onClick={() => handleToggleStatus(coach)}
-                      className={`px-2 py-1 text-xs rounded-full transition-colors ${
+                      className={`px-2 py-1 text-xs rounded-none-none transition-colors ${
                         coach.isActive
                           ? "bg-green-100 text-green-800 hover:bg-green-200"
                           : "bg-red-100 text-red-800 hover:bg-red-200"
@@ -199,7 +199,7 @@ export default function CoachesPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <button
                       onClick={() => openEditModal(coach)}
-                      className="text-blue-600 hover:text-blue-900 mr-3"
+                      className="text-primary hover:text-blue-900 mr-3"
                     >
                       <Edit className="h-4 w-4" />
                     </button>
@@ -209,10 +209,10 @@ export default function CoachesPage() {
             </tbody>
           </table>
           {!coaches && (
-            <div className="text-center py-8 text-gray-500">Chargement...</div>
+            <div className="text-center py-8 text-gray-700">Chargement...</div>
           )}
           {coaches?.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-700">
               Aucun coach trouvé
             </div>
           )}
@@ -222,7 +222,7 @@ export default function CoachesPage() {
       {/* Modal Création */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white rounded-none-none p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">
                 Nouveau Coach
@@ -230,7 +230,7 @@ export default function CoachesPage() {
               <button
                 onClick={() => setIsCreateModalOpen(false)}
                 disabled={isSubmitting}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                className="text-gray-500 hover:text-gray-600 disabled:opacity-50"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -243,7 +243,7 @@ export default function CoachesPage() {
                   </label>
                   <input
                     {...registerCreate("clerkId")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-blue-500 focus:ring-blue-500 border-2 border-foreground px-3 py-2"
                     placeholder="user_xxx"
                     disabled={isSubmitting}
                   />
@@ -260,7 +260,7 @@ export default function CoachesPage() {
                   <input
                     {...registerCreate("email")}
                     type="email"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-blue-500 focus:ring-blue-500 border-2 border-foreground px-3 py-2"
                     placeholder="coach@example.com"
                     disabled={isSubmitting}
                   />
@@ -276,7 +276,7 @@ export default function CoachesPage() {
                   </label>
                   <input
                     {...registerCreate("fullName")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-blue-500 focus:ring-blue-500 border-2 border-foreground px-3 py-2"
                     placeholder="John Doe"
                     disabled={isSubmitting}
                   />
@@ -292,7 +292,7 @@ export default function CoachesPage() {
                   </label>
                   <input
                     {...registerCreate("phone")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-blue-500 focus:ring-blue-500 border-2 border-foreground px-3 py-2"
                     placeholder="+216 XX XXX XXX"
                     disabled={isSubmitting}
                   />
@@ -303,14 +303,14 @@ export default function CoachesPage() {
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
                   disabled={isSubmitting}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  className="px-4 py-2 border-2 border-foreground border-2 border-foreground rounded-none-none text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center disabled:opacity-50"
+                  className="px-4 py-2 bg-primary text-black text-white rounded-none-none hover:bg-primary-hover hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_var(--color-foreground)] transition-all flex items-center disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <span className="flex items-center">
@@ -336,7 +336,7 @@ export default function CoachesPage() {
       {/* Modal Édition */}
       {editingCoach && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white rounded-none-none p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">
                 Modifier Coach
@@ -344,7 +344,7 @@ export default function CoachesPage() {
               <button
                 onClick={() => setEditingCoach(null)}
                 disabled={isSubmitting}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                className="text-gray-500 hover:text-gray-600 disabled:opacity-50"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -357,7 +357,7 @@ export default function CoachesPage() {
                   </label>
                   <input
                     {...registerUpdate("fullName")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-blue-500 focus:ring-blue-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   />
                   {updateErrors.fullName && (
@@ -372,7 +372,7 @@ export default function CoachesPage() {
                   </label>
                   <input
                     {...registerUpdate("phone")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-blue-500 focus:ring-blue-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   />
                 </div>
@@ -381,7 +381,7 @@ export default function CoachesPage() {
                     <input
                       {...registerUpdate("isActive")}
                       type="checkbox"
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded-none border-2 border-foreground text-primary focus:ring-blue-500"
                       disabled={isSubmitting}
                     />
                     <span className="ml-2 text-sm text-gray-700">Actif</span>
@@ -393,14 +393,14 @@ export default function CoachesPage() {
                   type="button"
                   onClick={() => setEditingCoach(null)}
                   disabled={isSubmitting}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  className="px-4 py-2 border-2 border-foreground border-2 border-foreground rounded-none-none text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center disabled:opacity-50"
+                  className="px-4 py-2 bg-primary text-black text-white rounded-none-none hover:bg-primary-hover hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_var(--color-foreground)] transition-all flex items-center disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <span className="flex items-center">

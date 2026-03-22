@@ -1,0 +1,31 @@
+
+> frontend@0.1.0 build
+> next build
+
+ÔÜá Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\jawis\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\jawis\OneDrive\Desktop\sahbi\frontend\package-lock.json
+
+Ôû▓ Next.js 16.2.0 (Turbopack)
+- Environments: .env.local
+
+ÔÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 7.6s
+  Running TypeScript ...
+Failed to type check.
+
+./src/app/schedule/page.tsx:37:31
+Type error: Property 'groups' does not exist on type '{ users: { getUsers: FunctionReference<"query", "public", { role?: "superadmin" | "coach" | undefined; }, { _id: Id<"users">; _creationTime: number; phone?: string | undefined; clerkId: string; email: string; role: "superadmin" | ... 2 more ... | "coach"; fullName: string; isActive: boolean; createdAt: number; }[], ...'.
+
+  35 |
+  36 |   const sessions = useQuery(api.sessions.getSessions, {});
+> 37 |   const groups = useQuery(api.groups.getGroups);
+     |                               ^
+  38 |   const coaches = useQuery(api.users.getUsers);
+  39 |
+  40 |   const createSession = useMutation(api.sessions.createSession);
+Next.js build worker exited with code: 1 and signal: null

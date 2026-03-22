@@ -19,7 +19,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-[4px_4px_0px_var(--color-foreground)] border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
@@ -28,7 +28,7 @@ export default function DashboardPage() {
                 Bienvenue, {user?.firstName || user?.emailAddresses[0]?.emailAddress}
               </p>
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-700">
               {new Date().toLocaleDateString('fr-FR', { 
                 weekday: 'long', 
                 year: 'numeric', 
@@ -44,16 +44,16 @@ export default function DashboardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {stats === undefined ? (
           <div className="flex items-center justify-center h-64">
-            <div className="text-gray-500">Chargement...</div>
+            <div className="text-gray-700">Chargement...</div>
           </div>
         ) : (
           <>
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {/* Active Members */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] p-6">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-blue-100 text-blue-600">
+                  <div className="p-3 rounded-none-none bg-blue-100 text-primary">
                     <Users className="h-6 w-6" />
                   </div>
                   <div className="ml-4">
@@ -64,9 +64,9 @@ export default function DashboardPage() {
               </div>
 
               {/* Monthly Revenue */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] p-6">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-green-100 text-green-600">
+                  <div className="p-3 rounded-none-none bg-green-100 text-green-600">
                     <DollarSign className="h-6 w-6" />
                   </div>
                   <div className="ml-4">
@@ -79,9 +79,9 @@ export default function DashboardPage() {
               </div>
 
               {/* Net Profit */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] p-6">
                 <div className="flex items-center">
-                  <div className={`p-3 rounded-full ${(stats?.netProfit || 0) >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                  <div className={`p-3 rounded-none-none ${(stats?.netProfit || 0) >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
                     <TrendingUp className="h-6 w-6" />
                   </div>
                   <div className="ml-4">
@@ -94,9 +94,9 @@ export default function DashboardPage() {
               </div>
 
               {/* Unpaid Count */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] p-6">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-orange-100 text-orange-600">
+                  <div className="p-3 rounded-none-none bg-orange-100 text-orange-600">
                     <AlertCircle className="h-6 w-6" />
                   </div>
                   <div className="ml-4">
@@ -108,33 +108,33 @@ export default function DashboardPage() {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Actions Rapides</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <a 
                   href="/members"
-                  className="flex items-center p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center p-4 border-2 border-foreground rounded-none-none hover:bg-gray-50 transition-colors"
                 >
-                  <Users className="h-5 w-5 text-blue-600 mr-3" />
+                  <Users className="h-5 w-5 text-primary mr-3" />
                   <span className="font-medium">Gestion Adhérents</span>
                 </a>
                 <a 
                   href="/payments"
-                  className="flex items-center p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center p-4 border-2 border-foreground rounded-none-none hover:bg-gray-50 transition-colors"
                 >
                   <Wallet className="h-5 w-5 text-green-600 mr-3" />
                   <span className="font-medium">Nouveau Paiement</span>
                 </a>
                 <a 
                   href="/disciplines"
-                  className="flex items-center p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center p-4 border-2 border-foreground rounded-none-none hover:bg-gray-50 transition-colors"
                 >
                   <Activity className="h-5 w-5 text-purple-600 mr-3" />
                   <span className="font-medium">Disciplines</span>
                 </a>
                 <a 
                   href="/expenses"
-                  className="flex items-center p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center p-4 border-2 border-foreground rounded-none-none hover:bg-gray-50 transition-colors"
                 >
                   <DollarSign className="h-5 w-5 text-red-600 mr-3" />
                   <span className="font-medium">Dépenses</span>

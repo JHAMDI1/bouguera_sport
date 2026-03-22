@@ -126,18 +126,18 @@ export default function GroupsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-[4px_4px_0px_var(--color-foreground)] border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <Users className="h-6 w-6 text-indigo-600 mr-3" />
+              <Users className="h-6 w-6 text-primary mr-3" />
               <h1 className="text-2xl font-bold text-gray-900">
                 Gestion des Groupes
               </h1>
             </div>
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center hover:bg-indigo-700 transition-colors"
+              className="bg-primary text-black text-white px-4 py-2 rounded-none-none flex items-center hover:bg-primary-hover hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_var(--color-foreground)] transition-all transition-colors"
             >
               <Plus className="h-4 w-4 mr-2" />
               Nouveau Groupe
@@ -147,34 +147,34 @@ export default function GroupsPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
+        <div className="bg-white rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] overflow-hidden">
+          <table className="min-w-full divide-y-2-2 divide-foreground">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Groupe
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Discipline
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Coach
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Horaires
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Capacité
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Statut
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y-2 divide-foreground">
               {groups?.map((group) => (
                 <tr key={group._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -183,19 +183,19 @@ export default function GroupsPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">
+                    <span className="px-2 py-1 text-xs rounded-none-none bg-purple-100 text-purple-800">
                       {getDisciplineName(group.disciplineId)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center text-sm text-gray-900">
-                      <UserCircle className="h-4 w-4 mr-1 text-gray-400" />
+                      <UserCircle className="h-4 w-4 mr-1 text-gray-500" />
                       {getCoachName(group.coachId)}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center text-sm text-gray-600">
-                      <Calendar className="h-4 w-4 mr-1 text-gray-400" />
+                      <Calendar className="h-4 w-4 mr-1 text-gray-500" />
                       {group.schedule || "Non défini"}
                     </div>
                   </td>
@@ -206,7 +206,7 @@ export default function GroupsPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`px-2 py-1 text-xs rounded-full ${
+                      className={`px-2 py-1 text-xs rounded-none-none ${
                         group.isActive
                           ? "bg-green-100 text-green-800"
                           : "bg-red-100 text-red-800"
@@ -218,7 +218,7 @@ export default function GroupsPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <button
                       onClick={() => openEditModal(group)}
-                      className="text-indigo-600 hover:text-indigo-900"
+                      className="text-primary hover:text-indigo-900"
                     >
                       <Edit className="h-4 w-4" />
                     </button>
@@ -228,10 +228,10 @@ export default function GroupsPage() {
             </tbody>
           </table>
           {!groups && (
-            <div className="text-center py-8 text-gray-500">Chargement...</div>
+            <div className="text-center py-8 text-gray-700">Chargement...</div>
           )}
           {groups?.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-700">
               Aucun groupe trouvé
             </div>
           )}
@@ -241,7 +241,7 @@ export default function GroupsPage() {
       {/* Modal Création */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-none-none p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">
                 Nouveau Groupe
@@ -249,7 +249,7 @@ export default function GroupsPage() {
               <button
                 onClick={() => setIsCreateModalOpen(false)}
                 disabled={isSubmitting}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                className="text-gray-500 hover:text-gray-600 disabled:opacity-50"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -262,7 +262,7 @@ export default function GroupsPage() {
                   </label>
                   <input
                     {...registerCreate("name")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     placeholder="Taekwondo - Enfants 8-12 ans"
                     disabled={isSubmitting}
                   />
@@ -278,7 +278,7 @@ export default function GroupsPage() {
                   </label>
                   <select
                     {...registerCreate("disciplineId")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   >
                     <option value="">Sélectionner une discipline</option>
@@ -300,7 +300,7 @@ export default function GroupsPage() {
                   </label>
                   <select
                     {...registerCreate("coachId")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   >
                     <option value="">Sélectionner un coach</option>
@@ -322,7 +322,7 @@ export default function GroupsPage() {
                   </label>
                   <input
                     {...registerCreate("schedule")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     placeholder="Lundi/Mercredi 18h-20h"
                     disabled={isSubmitting}
                   />
@@ -335,7 +335,7 @@ export default function GroupsPage() {
                     {...registerCreate("maxCapacity", { valueAsNumber: true })}
                     type="number"
                     min={1}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   />
                   {createErrors.maxCapacity && (
@@ -350,14 +350,14 @@ export default function GroupsPage() {
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
                   disabled={isSubmitting}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  className="px-4 py-2 border-2 border-foreground border-2 border-foreground rounded-none-none text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center disabled:opacity-50"
+                  className="px-4 py-2 bg-primary text-black text-white rounded-none-none hover:bg-primary-hover hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_var(--color-foreground)] transition-all flex items-center disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>
@@ -380,7 +380,7 @@ export default function GroupsPage() {
       {/* Modal Édition */}
       {editingGroup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-none-none p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">
                 Modifier Groupe
@@ -388,7 +388,7 @@ export default function GroupsPage() {
               <button
                 onClick={() => setEditingGroup(null)}
                 disabled={isSubmitting}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                className="text-gray-500 hover:text-gray-600 disabled:opacity-50"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -401,7 +401,7 @@ export default function GroupsPage() {
                   </label>
                   <input
                     {...registerUpdate("name")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   />
                   {updateErrors.name && (
@@ -416,7 +416,7 @@ export default function GroupsPage() {
                   </label>
                   <select
                     {...registerUpdate("disciplineId")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   >
                     <option value="">Sélectionner une discipline</option>
@@ -438,7 +438,7 @@ export default function GroupsPage() {
                   </label>
                   <select
                     {...registerUpdate("coachId")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   >
                     <option value="">Sélectionner un coach</option>
@@ -460,7 +460,7 @@ export default function GroupsPage() {
                   </label>
                   <input
                     {...registerUpdate("schedule")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   />
                 </div>
@@ -472,7 +472,7 @@ export default function GroupsPage() {
                     {...registerUpdate("maxCapacity", { valueAsNumber: true })}
                     type="number"
                     min={1}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   />
                   {updateErrors.maxCapacity && (
@@ -486,7 +486,7 @@ export default function GroupsPage() {
                     <input
                       {...registerUpdate("isActive")}
                       type="checkbox"
-                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      className="rounded-none border-2 border-foreground text-primary focus:ring-indigo-500"
                       disabled={isSubmitting}
                     />
                     <span className="ml-2 text-sm text-gray-700">Actif</span>
@@ -498,14 +498,14 @@ export default function GroupsPage() {
                   type="button"
                   onClick={() => setEditingGroup(null)}
                   disabled={isSubmitting}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  className="px-4 py-2 border-2 border-foreground border-2 border-foreground rounded-none-none text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center disabled:opacity-50"
+                  className="px-4 py-2 bg-primary text-black text-white rounded-none-none hover:bg-primary-hover hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_var(--color-foreground)] transition-all flex items-center disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>

@@ -148,17 +148,17 @@ export default function FamiliesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-[4px_4px_0px_var(--color-foreground)] border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <Users className="h-6 w-6 text-indigo-600 mr-3" />
+              <Users className="h-6 w-6 text-primary mr-3" />
               <h1 className="text-2xl font-bold text-gray-900">Gestion des Familles</h1>
             </div>
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => families && exportFamiliesToCSV(families)}
-                className="bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center hover:bg-gray-700"
+                className="bg-gray-600 text-white px-4 py-2 rounded-none-none flex items-center hover:bg-gray-700"
                 title="Exporter en CSV"
               >
                 <Download className="h-4 w-4 mr-2" />
@@ -166,7 +166,7 @@ export default function FamiliesPage() {
               </button>
               <button
                 onClick={() => setIsCreateModalOpen(true)}
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center hover:bg-indigo-700"
+                className="bg-primary text-black text-white px-4 py-2 rounded-none-none flex items-center hover:bg-primary-hover hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_var(--color-foreground)] transition-all"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Nouvelle Famille
@@ -180,67 +180,67 @@ export default function FamiliesPage() {
         {/* Search */}
         <div className="mb-6">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
             <input
               type="text"
               placeholder="Rechercher une famille..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full max-w-md pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full max-w-md pl-10 pr-4 py-2 border-2 border-foreground border-2 border-foreground rounded-none-none focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
         </div>
 
         {/* Families Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
+        <div className="bg-white rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] overflow-hidden">
+          <table className="min-w-full divide-y-2-2 divide-foreground">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Famille</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Téléphone</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Réduction</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Famille</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Contact</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Téléphone</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Réduction</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Statut</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y-2 divide-foreground">
               {filteredFamilies?.map((family) => (
                 <tr key={family._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <Users className="h-5 w-5 text-indigo-600 mr-2" />
+                      <Users className="h-5 w-5 text-primary mr-2" />
                       <span className="text-sm font-medium text-gray-900">{family.familyName}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {family.primaryContactName}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     {family.primaryContactPhone ? (
                       <div className="flex items-center">
-                        <Phone className="h-4 w-4 mr-1 text-gray-400" />
+                        <Phone className="h-4 w-4 mr-1 text-gray-500" />
                         {family.primaryContactPhone}
                       </div>
                     ) : (
-                      <span className="text-gray-400">-</span>
+                      <span className="text-gray-500">-</span>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {family.discountPercentage ? (
-                      <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                      <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-none-none bg-green-100 text-green-800">
                         <Percent className="h-3 w-3 mr-1" />
                         {family.discountPercentage}%
                       </span>
                     ) : (
-                      <span className="text-gray-400 text-sm">-</span>
+                      <span className="text-gray-500 text-sm">-</span>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button
                       onClick={() => handleToggleStatus(family)}
                       disabled={isSubmitting}
-                      className={`px-2 py-1 text-xs rounded-full ${
+                      className={`px-2 py-1 text-xs rounded-none-none ${
                         family.isActive
                           ? "bg-green-100 text-green-800 hover:bg-green-200"
                           : "bg-red-100 text-red-800 hover:bg-red-200"
@@ -253,7 +253,7 @@ export default function FamiliesPage() {
                     <button
                       onClick={() => handleEdit(family)}
                       disabled={isSubmitting}
-                      className="text-indigo-600 hover:text-indigo-900 mr-3 disabled:opacity-50"
+                      className="text-primary hover:text-indigo-900 mr-3 disabled:opacity-50"
                     >
                       <Edit className="h-4 w-4" />
                     </button>
@@ -263,10 +263,10 @@ export default function FamiliesPage() {
             </tbody>
           </table>
           {!families && (
-            <div className="text-center py-8 text-gray-500">Chargement...</div>
+            <div className="text-center py-8 text-gray-700">Chargement...</div>
           )}
           {filteredFamilies?.length === 0 && (
-            <div className="text-center py-8 text-gray-500">Aucune famille trouvée</div>
+            <div className="text-center py-8 text-gray-700">Aucune famille trouvée</div>
           )}
         </div>
       </main>
@@ -274,13 +274,13 @@ export default function FamiliesPage() {
       {/* Modal Création */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-none-none p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">Nouvelle Famille</h2>
               <button
                 onClick={() => setIsCreateModalOpen(false)}
                 disabled={isSubmitting}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                className="text-gray-500 hover:text-gray-600 disabled:opacity-50"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -291,7 +291,7 @@ export default function FamiliesPage() {
                   <label className="block text-sm font-medium text-gray-700">Nom de la famille</label>
                   <input
                     {...registerCreate("familyName")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     placeholder="Famille Dupont"
                     disabled={isSubmitting}
                   />
@@ -303,7 +303,7 @@ export default function FamiliesPage() {
                   <label className="block text-sm font-medium text-gray-700">Nom du contact principal</label>
                   <input
                     {...registerCreate("primaryContactName")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     placeholder="Jean Dupont"
                     disabled={isSubmitting}
                   />
@@ -315,7 +315,7 @@ export default function FamiliesPage() {
                   <label className="block text-sm font-medium text-gray-700">Téléphone</label>
                   <input
                     {...registerCreate("primaryContactPhone")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     placeholder="+216 XX XXX XXX"
                     disabled={isSubmitting}
                   />
@@ -329,7 +329,7 @@ export default function FamiliesPage() {
                     type="number"
                     min={0}
                     max={100}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     placeholder="0"
                     disabled={isSubmitting}
                   />
@@ -343,14 +343,14 @@ export default function FamiliesPage() {
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
                   disabled={isSubmitting}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  className="px-4 py-2 border-2 border-foreground border-2 border-foreground rounded-none-none text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center disabled:opacity-50"
+                  className="px-4 py-2 bg-primary text-black text-white rounded-none-none hover:bg-primary-hover hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_var(--color-foreground)] transition-all flex items-center disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>
@@ -373,13 +373,13 @@ export default function FamiliesPage() {
       {/* Modal Édition */}
       {editingFamily && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-none-none p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">Modifier Famille</h2>
               <button
                 onClick={() => setEditingFamily(null)}
                 disabled={isSubmitting}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                className="text-gray-500 hover:text-gray-600 disabled:opacity-50"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -390,7 +390,7 @@ export default function FamiliesPage() {
                   <label className="block text-sm font-medium text-gray-700">Nom de la famille</label>
                   <input
                     {...registerUpdate("familyName")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   />
                   {updateErrors.familyName && (
@@ -401,7 +401,7 @@ export default function FamiliesPage() {
                   <label className="block text-sm font-medium text-gray-700">Nom du contact principal</label>
                   <input
                     {...registerUpdate("primaryContactName")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   />
                   {updateErrors.primaryContactName && (
@@ -412,7 +412,7 @@ export default function FamiliesPage() {
                   <label className="block text-sm font-medium text-gray-700">Téléphone</label>
                   <input
                     {...registerUpdate("primaryContactPhone")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   />
                 </div>
@@ -423,7 +423,7 @@ export default function FamiliesPage() {
                     type="number"
                     min={0}
                     max={100}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   />
                   {updateErrors.discountPercentage && (
@@ -435,7 +435,7 @@ export default function FamiliesPage() {
                     <input
                       {...registerUpdate("isActive")}
                       type="checkbox"
-                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      className="rounded-none border-2 border-foreground text-primary focus:ring-indigo-500"
                       disabled={isSubmitting}
                     />
                     <span className="ml-2 text-sm text-gray-700">Famille active</span>
@@ -447,14 +447,14 @@ export default function FamiliesPage() {
                   type="button"
                   onClick={() => setEditingFamily(null)}
                   disabled={isSubmitting}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  className="px-4 py-2 border-2 border-foreground border-2 border-foreground rounded-none-none text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center disabled:opacity-50"
+                  className="px-4 py-2 bg-primary text-black text-white rounded-none-none hover:bg-primary-hover hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_var(--color-foreground)] transition-all flex items-center disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>

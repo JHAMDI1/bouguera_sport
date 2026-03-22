@@ -127,16 +127,16 @@ export default function MembersPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-[4px_4px_0px_var(--color-foreground)] border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <Users className="h-6 w-6 text-blue-600 mr-3" />
+              <Users className="h-6 w-6 text-primary mr-3" />
               <h1 className="text-2xl font-bold text-gray-900">Gestion des Adhérents</h1>
             </div>
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center hover:bg-blue-700 transition-colors"
+              className="bg-primary text-black text-white px-4 py-2 rounded-none-none flex items-center hover:bg-primary-hover hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_var(--color-foreground)] transition-all transition-colors"
             >
               <Plus className="h-4 w-4 mr-2" />
               Nouvel Adhérent
@@ -148,41 +148,41 @@ export default function MembersPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search */}
         <div className="mb-6 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
           <input
             type="text"
             placeholder="Rechercher un adhérent..."
-            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full pl-10 pr-4 py-2 border-2 border-foreground rounded-none-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
         {/* Members Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
+        <div className="bg-white rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] overflow-hidden">
+          <table className="min-w-full divide-y-2-2 divide-foreground">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Adhérent</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Inscription</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Adhérent</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Contact</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Inscription</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Statut</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y-2 divide-foreground">
               {filteredMembers?.map((member) => (
                 <tr key={member._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                        <UserCircle className="h-6 w-6 text-blue-600" />
+                      <div className="h-10 w-10 rounded-none-none bg-blue-100 flex items-center justify-center mr-3">
+                        <UserCircle className="h-6 w-6 text-primary" />
                       </div>
                       <div>
                         <div className="text-sm font-medium text-gray-900">
                           {member.firstName} {member.lastName}
                         </div>
-                        <div className="text-xs text-gray-500 capitalize">
+                        <div className="text-xs text-gray-700 capitalize">
                           {member.gender === "male" ? "Homme" : "Femme"}
                         </div>
                       </div>
@@ -191,21 +191,21 @@ export default function MembersPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     {member.phone && (
                       <div className="text-sm text-gray-900 flex items-center">
-                        <Phone className="h-4 w-4 mr-1 text-gray-400" />
+                        <Phone className="h-4 w-4 mr-1 text-gray-500" />
                         {member.phone}
                       </div>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Calendar className="h-4 w-4 mr-1 text-gray-400" />
+                    <div className="flex items-center text-sm text-gray-700">
+                      <Calendar className="h-4 w-4 mr-1 text-gray-500" />
                       {new Date(member.registrationDate).toLocaleDateString("fr-FR")}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button
                       onClick={() => handleToggleStatus(member)}
-                      className={`px-2 py-1 text-xs rounded-full transition-colors ${
+                      className={`px-2 py-1 text-xs rounded-none-none transition-colors ${
                         member.isActive
                           ? "bg-green-100 text-green-800 hover:bg-green-200"
                           : "bg-red-100 text-red-800 hover:bg-red-200"
@@ -217,7 +217,7 @@ export default function MembersPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <button
                       onClick={() => openEditModal(member)}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="text-primary hover:text-blue-900"
                     >
                       <Edit className="h-4 w-4" />
                     </button>
@@ -227,10 +227,10 @@ export default function MembersPage() {
             </tbody>
           </table>
           {!members && (
-            <div className="text-center py-8 text-gray-500">Chargement...</div>
+            <div className="text-center py-8 text-gray-700">Chargement...</div>
           )}
           {filteredMembers?.length === 0 && (
-            <div className="text-center py-8 text-gray-500">Aucun adhérent trouvé</div>
+            <div className="text-center py-8 text-gray-700">Aucun adhérent trouvé</div>
           )}
         </div>
       </main>
@@ -238,13 +238,13 @@ export default function MembersPage() {
       {/* Modal Création */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-none-none p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">Nouvel Adhérent</h2>
               <button
                 onClick={() => setIsCreateModalOpen(false)}
                 disabled={isSubmitting}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                className="text-gray-500 hover:text-gray-600 disabled:opacity-50"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -256,7 +256,7 @@ export default function MembersPage() {
                     <label className="block text-sm font-medium text-gray-700">Prénom</label>
                     <input
                       {...registerCreate("firstName")}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2"
+                      className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-blue-500 focus:ring-blue-500 border-2 border-foreground px-3 py-2"
                       disabled={isSubmitting}
                     />
                     {createErrors.firstName && (
@@ -267,7 +267,7 @@ export default function MembersPage() {
                     <label className="block text-sm font-medium text-gray-700">Nom</label>
                     <input
                       {...registerCreate("lastName")}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2"
+                      className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-blue-500 focus:ring-blue-500 border-2 border-foreground px-3 py-2"
                       disabled={isSubmitting}
                     />
                     {createErrors.lastName && (
@@ -279,7 +279,7 @@ export default function MembersPage() {
                   <label className="block text-sm font-medium text-gray-700">Téléphone</label>
                   <input
                     {...registerCreate("phone")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-blue-500 focus:ring-blue-500 border-2 border-foreground px-3 py-2"
                     placeholder="+216 XX XXX XXX"
                     disabled={isSubmitting}
                   />
@@ -288,7 +288,7 @@ export default function MembersPage() {
                   <label className="block text-sm font-medium text-gray-700">Genre</label>
                   <select
                     {...registerCreate("gender")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-blue-500 focus:ring-blue-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   >
                     <option value="male">Homme</option>
@@ -302,14 +302,14 @@ export default function MembersPage() {
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
                   disabled={isSubmitting}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  className="px-4 py-2 border-2 border-foreground border-2 border-foreground rounded-none-none text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center disabled:opacity-50"
+                  className="px-4 py-2 bg-primary text-black text-white rounded-none-none hover:bg-primary-hover hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_var(--color-foreground)] transition-all flex items-center disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <span className="flex items-center">
@@ -335,13 +335,13 @@ export default function MembersPage() {
       {/* Modal Édition */}
       {editingMember && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-none-none p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">Modifier Adhérent</h2>
               <button
                 onClick={() => setEditingMember(null)}
                 disabled={isSubmitting}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                className="text-gray-500 hover:text-gray-600 disabled:opacity-50"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -353,7 +353,7 @@ export default function MembersPage() {
                     <label className="block text-sm font-medium text-gray-700">Prénom</label>
                     <input
                       {...registerUpdate("firstName")}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2"
+                      className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-blue-500 focus:ring-blue-500 border-2 border-foreground px-3 py-2"
                       disabled={isSubmitting}
                     />
                     {updateErrors.firstName && (
@@ -364,7 +364,7 @@ export default function MembersPage() {
                     <label className="block text-sm font-medium text-gray-700">Nom</label>
                     <input
                       {...registerUpdate("lastName")}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2"
+                      className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-blue-500 focus:ring-blue-500 border-2 border-foreground px-3 py-2"
                       disabled={isSubmitting}
                     />
                     {updateErrors.lastName && (
@@ -376,7 +376,7 @@ export default function MembersPage() {
                   <label className="block text-sm font-medium text-gray-700">Téléphone</label>
                   <input
                     {...registerUpdate("phone")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-blue-500 focus:ring-blue-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   />
                 </div>
@@ -384,7 +384,7 @@ export default function MembersPage() {
                   <label className="block text-sm font-medium text-gray-700">Genre</label>
                   <select
                     {...registerUpdate("gender")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-blue-500 focus:ring-blue-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   >
                     <option value="male">Homme</option>
@@ -398,14 +398,14 @@ export default function MembersPage() {
                   type="button"
                   onClick={() => setEditingMember(null)}
                   disabled={isSubmitting}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  className="px-4 py-2 border-2 border-foreground border-2 border-foreground rounded-none-none text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center disabled:opacity-50"
+                  className="px-4 py-2 bg-primary text-black text-white rounded-none-none hover:bg-primary-hover hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_var(--color-foreground)] transition-all flex items-center disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <span className="flex items-center">

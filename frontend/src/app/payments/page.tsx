@@ -135,7 +135,7 @@ export default function PaymentsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-[4px_4px_0px_var(--color-foreground)] border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -153,7 +153,7 @@ export default function PaymentsPage() {
               </div>
               <button
                 onClick={() => setIsCreateModalOpen(true)}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center hover:bg-green-700"
+                className="bg-green-600 text-white px-4 py-2 rounded-none-none flex items-center hover:bg-green-700"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Nouveau Paiement
@@ -167,17 +167,17 @@ export default function PaymentsPage() {
         {/* Filters */}
         <div className="mb-6 flex space-x-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
             <input
               type="text"
               placeholder="Rechercher un paiement..."
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              className="w-full pl-10 pr-4 py-2 border-2 border-foreground rounded-none-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <select
-            className="border rounded-lg px-4 py-2"
+            className="border-2 border-foreground rounded-none-none px-4 py-2"
             value={selectedMonth || ""}
             onChange={(e) =>
               setSelectedMonth(e.target.value ? parseInt(e.target.value) : null)
@@ -195,39 +195,39 @@ export default function PaymentsPage() {
         </div>
 
         {/* Payments Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
+        <div className="bg-white rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] overflow-hidden">
+          <table className="min-w-full divide-y-2-2 divide-foreground">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">
                   N° Reçu
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">
                   Membre/Famille
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">
                   Montant
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">
                   Mois couvert
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">
                   Date de paiement
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">
                   Reçu par
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y-2 divide-foreground">
               {filteredPayments?.map((payment) => (
                 <tr key={payment._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     <div className="flex items-center">
-                      <Receipt className="h-4 w-4 mr-2 text-gray-400" />
+                      <Receipt className="h-4 w-4 mr-2 text-gray-500" />
                       #{payment.receiptNumber}
                     </div>
                   </td>
@@ -249,16 +249,16 @@ export default function PaymentsPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
                     {payment.amount.toLocaleString("fr-FR")} TND
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     {new Date(
                       payment.yearCovered,
                       payment.monthCovered - 1
                     ).toLocaleString("fr-FR", { month: "long", year: "numeric" })}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     {new Date(payment.paymentDate).toLocaleDateString("fr-FR")}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     {getReceivedByName(payment.receivedBy)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -276,10 +276,10 @@ export default function PaymentsPage() {
             </tbody>
           </table>
           {!payments && (
-            <div className="text-center py-8 text-gray-500">Chargement...</div>
+            <div className="text-center py-8 text-gray-700">Chargement...</div>
           )}
           {filteredPayments?.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-700">
               Aucun paiement trouvé
             </div>
           )}
@@ -289,7 +289,7 @@ export default function PaymentsPage() {
       {/* Modal Création Paiement */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-none-none p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">
                 Nouveau Paiement
@@ -297,7 +297,7 @@ export default function PaymentsPage() {
               <button
                 onClick={() => setIsCreateModalOpen(false)}
                 disabled={isSubmitting}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                className="text-gray-500 hover:text-gray-600 disabled:opacity-50"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -311,7 +311,7 @@ export default function PaymentsPage() {
                   </label>
                   <select
                     {...register("memberId")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-green-500 focus:ring-green-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   >
                     <option value="">Sélectionner un membre</option>
@@ -338,7 +338,7 @@ export default function PaymentsPage() {
                     type="number"
                     min={1}
                     step={0.001}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-green-500 focus:ring-green-500 border-2 border-foreground px-3 py-2"
                     placeholder="50.000"
                     disabled={isSubmitting}
                   />
@@ -357,7 +357,7 @@ export default function PaymentsPage() {
                     </label>
                     <select
                       {...register("monthCovered", { valueAsNumber: true })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2"
+                      className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-green-500 focus:ring-green-500 border-2 border-foreground px-3 py-2"
                       disabled={isSubmitting}
                     >
                       {[...Array(12)].map((_, i) => (
@@ -376,7 +376,7 @@ export default function PaymentsPage() {
                     <input
                       {...register("yearCovered", { valueAsNumber: true })}
                       type="number"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2"
+                      className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-green-500 focus:ring-green-500 border-2 border-foreground px-3 py-2"
                       disabled={isSubmitting}
                     />
                   </div>
@@ -389,7 +389,7 @@ export default function PaymentsPage() {
                   </label>
                   <input
                     {...register("receiptNumber")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-green-500 focus:ring-green-500 border-2 border-foreground px-3 py-2"
                     placeholder="REC-001"
                     disabled={isSubmitting}
                   />
@@ -408,7 +408,7 @@ export default function PaymentsPage() {
                   <textarea
                     {...register("notes")}
                     rows={3}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-green-500 focus:ring-green-500 border-2 border-foreground px-3 py-2"
                     placeholder="Commentaires sur le paiement..."
                     disabled={isSubmitting}
                   />
@@ -419,14 +419,14 @@ export default function PaymentsPage() {
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
                   disabled={isSubmitting}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  className="px-4 py-2 border-2 border-foreground border-2 border-foreground rounded-none-none text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center disabled:opacity-50"
+                  className="px-4 py-2 bg-green-600 text-white rounded-none-none hover:bg-green-700 flex items-center disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>

@@ -34,8 +34,8 @@ export default function SchedulePage() {
   const { modalProps, confirm } = useConfirmModal();
 
   const sessions = useQuery(api.sessions.getSessions, {});
-  const groups = useQuery(api.groups.getGroups);
-  const coaches = useQuery(api.users.getUsers);
+  const groups = useQuery(api.disciplines.getGroups, {});
+  const coaches = useQuery(api.users.getUsers, {});
 
   const createSession = useMutation(api.sessions.createSession);
   const updateSession = useMutation(api.sessions.updateSession);
@@ -84,7 +84,7 @@ export default function SchedulePage() {
   // Organize sessions by day and time
   const scheduleByDay = useMemo(() => {
     const schedule: { [key: number]: any[] } = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
-    
+
     sessions?.forEach((session) => {
       const day = session.dayOfWeek;
       if (schedule[day]) {
@@ -106,10 +106,10 @@ export default function SchedulePage() {
       // Calculate timestamps for the selected week
       const baseDate = new Date(weekStart);
       baseDate.setDate(baseDate.getDate() + data.dayOfWeek);
-      
+
       const startDate = new Date(baseDate);
       startDate.setHours(data.startHour, data.startMinute, 0, 0);
-      
+
       const endDate = new Date(baseDate);
       endDate.setHours(data.endHour, data.endMinute, 0, 0);
 
@@ -137,15 +137,15 @@ export default function SchedulePage() {
 
   const onUpdateSubmit = async (data: SessionFormData) => {
     if (!editingSession) return;
-    
+
     setIsSubmitting(true);
     try {
       const baseDate = new Date(weekStart);
       baseDate.setDate(baseDate.getDate() + data.dayOfWeek);
-      
+
       const startDate = new Date(baseDate);
       startDate.setHours(data.startHour, data.startMinute, 0, 0);
-      
+
       const endDate = new Date(baseDate);
       endDate.setHours(data.endHour, data.endMinute, 0, 0);
 
@@ -174,10 +174,10 @@ export default function SchedulePage() {
 
   const handleEdit = (session: any) => {
     setEditingSession(session);
-    
+
     const startDate = new Date(session.startTime);
     const endDate = new Date(session.endTime);
-    
+
     resetUpdate({
       groupId: session.groupId,
       coachId: session.coachId,
@@ -232,23 +232,23 @@ export default function SchedulePage() {
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <Calendar className="h-8 w-8 text-indigo-600 mr-3" />
+            <Calendar className="h-8 w-8 text-primary mr-3" />
             <h1 className="text-3xl font-bold text-gray-900">Planning des Cours</h1>
           </div>
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center hover:bg-indigo-700"
+            className="bg-primary text-black text-white px-4 py-2 rounded-none-none flex items-center hover:bg-primary-hover hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_var(--color-foreground)] transition-all"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nouvelle Séance
           </button>
         </div>
-        
+
         {/* Week Navigation */}
         <div className="flex items-center mt-4 space-x-4">
           <button
             onClick={() => navigateWeek(-1)}
-            className="p-2 hover:bg-gray-100 rounded-full"
+            className="p-2 hover:bg-gray-100 rounded-none-none"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -257,7 +257,7 @@ export default function SchedulePage() {
           </span>
           <button
             onClick={() => navigateWeek(1)}
-            className="p-2 hover:bg-gray-100 rounded-full"
+            className="p-2 hover:bg-gray-100 rounded-none-none"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
@@ -265,15 +265,14 @@ export default function SchedulePage() {
       </div>
 
       {/* Calendar Grid */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] overflow-hidden">
         <div className="grid grid-cols-8 border-b">
-          <div className="p-3 border-r bg-gray-50 font-medium text-gray-500">Heure</div>
+          <div className="p-3 border-r bg-gray-50 font-medium text-gray-700">Heure</div>
           {DAYS.map((day, index) => (
             <div
               key={day}
-              className={`p-3 text-center font-medium ${
-                index === new Date().getDay() ? "bg-indigo-50 text-indigo-700" : "bg-gray-50 text-gray-700"
-              }`}
+              className={`p-3 text-center font-medium ${index === new Date().getDay() ? "bg-indigo-50 text-indigo-700" : "bg-gray-50 text-gray-700"
+                }`}
             >
               {day}
             </div>
@@ -283,7 +282,7 @@ export default function SchedulePage() {
         {/* Time slots */}
         {HOURS.map((hour) => (
           <div key={hour} className="grid grid-cols-8 border-b min-h-[80px]">
-            <div className="p-2 border-r bg-gray-50 text-sm text-gray-500">
+            <div className="p-2 border-r bg-gray-50 text-sm text-gray-700">
               {hour.toString().padStart(2, "0")}:00
             </div>
             {DAYS.map((_, dayIndex) => {
@@ -297,7 +296,7 @@ export default function SchedulePage() {
                   {daySessions?.map((session) => (
                     <div
                       key={session._id}
-                      className="p-2 rounded text-xs mb-1 cursor-pointer hover:opacity-80 transition-opacity"
+                      className="p-2 rounded-none text-xs mb-1 cursor-pointer hover:opacity-80 transition-opacity"
                       style={{ backgroundColor: session.color || "#4F46E5", color: "white" }}
                       onClick={() => handleEdit(session)}
                     >
@@ -324,13 +323,13 @@ export default function SchedulePage() {
       {/* Create Modal */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-none-none p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">Nouvelle Séance</h2>
               <button
                 onClick={() => setIsCreateModalOpen(false)}
                 disabled={isSubmitting}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-500 hover:text-gray-600"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -341,7 +340,7 @@ export default function SchedulePage() {
                   <label className="block text-sm font-medium text-gray-700">Titre</label>
                   <input
                     {...registerCreate("title")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     placeholder="Taekwondo - Enfants"
                     disabled={isSubmitting}
                   />
@@ -354,7 +353,7 @@ export default function SchedulePage() {
                   <label className="block text-sm font-medium text-gray-700">Groupe</label>
                   <select
                     {...registerCreate("groupId")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   >
                     <option value="">Sélectionner un groupe</option>
@@ -373,7 +372,7 @@ export default function SchedulePage() {
                   <label className="block text-sm font-medium text-gray-700">Coach</label>
                   <select
                     {...registerCreate("coachId")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   >
                     <option value="">Sélectionner un coach</option>
@@ -392,7 +391,7 @@ export default function SchedulePage() {
                   <label className="block text-sm font-medium text-gray-700">Jour</label>
                   <select
                     {...registerCreate("dayOfWeek", { valueAsNumber: true })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   >
                     {DAYS.map((day, index) => (
@@ -409,7 +408,7 @@ export default function SchedulePage() {
                     <div className="flex space-x-2">
                       <select
                         {...registerCreate("startHour", { valueAsNumber: true })}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                        className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                         disabled={isSubmitting}
                       >
                         {HOURS.map((h) => (
@@ -418,7 +417,7 @@ export default function SchedulePage() {
                       </select>
                       <select
                         {...registerCreate("startMinute", { valueAsNumber: true })}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                        className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                         disabled={isSubmitting}
                       >
                         <option value={0}>00</option>
@@ -434,7 +433,7 @@ export default function SchedulePage() {
                     <div className="flex space-x-2">
                       <select
                         {...registerCreate("endHour", { valueAsNumber: true })}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                        className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                         disabled={isSubmitting}
                       >
                         {HOURS.map((h) => (
@@ -443,7 +442,7 @@ export default function SchedulePage() {
                       </select>
                       <select
                         {...registerCreate("endMinute", { valueAsNumber: true })}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                        className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                         disabled={isSubmitting}
                       >
                         <option value={0}>00</option>
@@ -459,7 +458,7 @@ export default function SchedulePage() {
                   <label className="block text-sm font-medium text-gray-700">Lieu</label>
                   <input
                     {...registerCreate("location")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     placeholder="Salle principale"
                     disabled={isSubmitting}
                   />
@@ -469,7 +468,7 @@ export default function SchedulePage() {
                   <label className="block text-sm font-medium text-gray-700">Notes</label>
                   <textarea
                     {...registerCreate("notes")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     rows={3}
                     disabled={isSubmitting}
                   />
@@ -479,7 +478,7 @@ export default function SchedulePage() {
                   <input
                     {...registerCreate("isRecurring")}
                     type="checkbox"
-                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                    className="rounded-none border-2 border-foreground text-primary focus:ring-indigo-500"
                     disabled={isSubmitting}
                   />
                   <span className="ml-2 text-sm text-gray-700">Séance récurrente (hebdomadaire)</span>
@@ -491,14 +490,14 @@ export default function SchedulePage() {
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
                   disabled={isSubmitting}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  className="px-4 py-2 border-2 border-foreground border-2 border-foreground rounded-none-none text-gray-700 hover:bg-gray-50"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center"
+                  className="px-4 py-2 bg-primary text-black text-white rounded-none-none hover:bg-primary-hover hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_var(--color-foreground)] transition-all flex items-center"
                 >
                   {isSubmitting ? (
                     <>
@@ -521,13 +520,13 @@ export default function SchedulePage() {
       {/* Edit Modal */}
       {editingSession && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-none-none p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">Modifier Séance</h2>
               <button
                 onClick={() => setEditingSession(null)}
                 disabled={isSubmitting}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-500 hover:text-gray-600"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -538,7 +537,7 @@ export default function SchedulePage() {
                   <label className="block text-sm font-medium text-gray-700">Titre</label>
                   <input
                     {...registerUpdate("title")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   />
                   {updateErrors.title && (
@@ -550,7 +549,7 @@ export default function SchedulePage() {
                   <label className="block text-sm font-medium text-gray-700">Groupe</label>
                   <select
                     {...registerUpdate("groupId")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   >
                     <option value="">Sélectionner un groupe</option>
@@ -566,7 +565,7 @@ export default function SchedulePage() {
                   <label className="block text-sm font-medium text-gray-700">Coach</label>
                   <select
                     {...registerUpdate("coachId")}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
+                    className="mt-1 block w-full rounded-none-none border-2 border-foreground shadow-[4px_4px_0px_var(--color-foreground)] focus:border-indigo-500 focus:ring-indigo-500 border-2 border-foreground px-3 py-2"
                     disabled={isSubmitting}
                   >
                     <option value="">Sélectionner un coach</option>
@@ -583,7 +582,7 @@ export default function SchedulePage() {
                     type="button"
                     onClick={() => handleDelete(editingSession)}
                     disabled={isSubmitting}
-                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center justify-center"
+                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-none-none hover:bg-red-700 flex items-center justify-center"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     Supprimer
@@ -596,14 +595,14 @@ export default function SchedulePage() {
                   type="button"
                   onClick={() => setEditingSession(null)}
                   disabled={isSubmitting}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  className="px-4 py-2 border-2 border-foreground border-2 border-foreground rounded-none-none text-gray-700 hover:bg-gray-50"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center"
+                  className="px-4 py-2 bg-primary text-black text-white rounded-none-none hover:bg-primary-hover hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_var(--color-foreground)] transition-all flex items-center"
                 >
                   {isSubmitting ? (
                     <>

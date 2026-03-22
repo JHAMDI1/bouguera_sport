@@ -119,7 +119,7 @@ function ToastItem({
 
   return (
     <div
-      className={`${bgColors[toast.type]} border rounded-lg shadow-lg p-4 flex items-start gap-3 animate-slide-in`}
+      className={`${bgColors[toast.type]} border-2 border-foreground rounded-none-none shadow-[4px_4px_0px_var(--color-foreground)] p-4 flex items-start gap-3 animate-slide-in`}
       role="alert"
     >
       {icons[toast.type]}
@@ -131,7 +131,7 @@ function ToastItem({
       </div>
       <button
         onClick={() => onDismiss(toast.id)}
-        className="text-gray-400 hover:text-gray-600 transition-colors"
+        className="text-gray-500 hover:text-gray-600 transition-colors"
         aria-label="Dismiss"
       >
         <X className="h-4 w-4" />
