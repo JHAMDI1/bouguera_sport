@@ -89,6 +89,24 @@ export const updateMember = mutation({
   },
 });
 
+export const deleteMember = mutation({
+  args: { id: v.id("members"), deletedBy: v.optional(v.id("users")) },
+  handler: async (ctx, args) => {
+    const member = await ctx.db.get(args.id);
+    if (member && args.deletedBy) {
+      await ctx.db.insert("auditLog", {
+        userId: args.deletedBy,
+        action: "MEMBER_DELETED",
+        entityType: "member",
+        entityId: args.id,
+        details: `Membre supprimé: ${member.firstName} ${member.lastName}`,
+        createdAt: Date.now(),
+      });
+    }
+    await ctx.db.delete(args.id);
+  },
+});
+
 // ─── Paiements ────────────────────────────────────────────────────────────────
 
 export const createPayment = mutation({
@@ -129,5 +147,39 @@ export const createPayment = mutation({
     });
 
     return paymentId;
+  },
+});
+
+export const updatePayment = mutation({
+  args: {
+    id: v.id("payments"),
+    memberId: v.optional(v.id("members")),
+    familyId: v.optional(v.id("families")),
+    disciplineId: v.optional(v.id("disciplines")),
+    amount: v.optional(v.number()),
+    monthCovered: v.optional(v.number()),
+    yearCovered: v.optional(v.number()),
+    paymentMethod: v.optional(v.union(v.literal("cash"), v.literal("card"), v.literal("transfer"))),
+    notes: v.optional(v.string()),
+    updatedBy: v.optional(v.id("users")),
+  },
+  handler: async (ctx, args) => {
+    const { id, updatedBy, ...updates } = args;
+    await ctx.db.patch(id, updates);
+
+    // Audit log
+    if (updatedBy) {
+      const changedFields = Object.keys(updates).join(", ");
+      await ctx.db.insert("auditLog", {
+        userId: updatedBy,
+        action: "PAYMENT_UPDATED",
+        entityType: "payment",
+        entityId: id,
+        details: `Paiement modifié: champs ${changedFields}`,
+        createdAt: Date.now(),
+      });
+    }
+
+    return id;
   },
 });

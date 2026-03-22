@@ -1,6 +1,6 @@
 "use client";
 
-import { Wallet, Plus, User, Users, Receipt, Printer } from "lucide-react";
+import { Wallet, Plus, User, Users, Receipt, Printer, Edit, Ban } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,11 +26,14 @@ export default function PaymentsPage() {
     selectedReceipt,
     setSelectedReceipt,
     createPayment,
+    updatePayment,
+    cancelPayment,
     handleViewReceipt,
     modalProps,
   } = usePayments();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingPayment, setEditingPayment] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
 
@@ -44,10 +47,10 @@ export default function PaymentsPage() {
   const totalRevenue = monthPayments?.reduce((sum, p) => sum + p.amount, 0) || 0;
 
   const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
+    register: registerCreate,
+    handleSubmit: handleSubmitCreate,
+    reset: resetCreate,
+    formState: { errors: createErrors },
   } = useForm<PaymentFormData>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
@@ -57,14 +60,51 @@ export default function PaymentsPage() {
     },
   });
 
-  const onSubmit = async (data: PaymentFormData) => {
+  const {
+    register: registerUpdate,
+    handleSubmit: handleSubmitUpdate,
+    reset: resetUpdate,
+    formState: { errors: updateErrors },
+  } = useForm<PaymentFormData>({
+    resolver: zodResolver(paymentSchema),
+  });
+
+  const onCreateSubmit = async (data: PaymentFormData) => {
     await createPayment(data, () => {
       setIsCreateModalOpen(false);
-      reset({
+      resetCreate({
         monthCovered: currentMonth,
         yearCovered: currentYear,
         receiptNumber: `REC-${Date.now().toString(36).toUpperCase().slice(-6)}`,
       });
+    });
+  };
+
+  const onUpdateSubmit = async (data: PaymentFormData) => {
+    if (!editingPayment) return;
+    await updatePayment(editingPayment._id, data, () => {
+      setEditingPayment(null);
+      resetUpdate();
+    });
+  };
+
+  const handleEdit = (payment: any) => {
+    setEditingPayment(payment);
+    resetUpdate({
+      memberId: payment.memberId || "",
+      familyId: payment.familyId || "",
+      disciplineId: payment.disciplineId || "",
+      amount: payment.amount,
+      monthCovered: payment.monthCovered,
+      yearCovered: payment.yearCovered,
+      receiptNumber: payment.receiptNumber,
+      notes: payment.notes || "",
+    });
+  };
+
+  const handleCancel = async (payment: any) => {
+    await cancelPayment(payment._id, payment.receiptNumber, () => {
+      setEditingPayment(null);
     });
   };
 
@@ -147,18 +187,82 @@ export default function PaymentsPage() {
     },
     {
       header: "Actions",
+      className: "text-right",
       accessor: (payment) => (
-        <button
-          onClick={() => handleViewReceipt(payment)}
-          className="text-primary-text hover:text-primary-active flex items-center text-sm transition-colors p-2"
-          title="Voir le reçu"
-        >
-          <Printer className="h-4 w-4 mr-1" />
-          Reçu
-        </button>
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={() => handleViewReceipt(payment)}
+            className="text-primary-text hover:text-primary-active flex items-center text-sm transition-colors p-2"
+            title="Voir le reçu"
+          >
+            <Printer className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => handleEdit(payment)}
+            className="text-primary-text hover:text-primary-active transition-colors p-2"
+            title="Modifier le paiement"
+          >
+            <Edit className="h-4 w-4" />
+          </button>
+        </div>
       )
     }
   ];
+
+  const PaymentFormFields = ({ registerFn, errors }: { registerFn: any; errors: any }) => (
+    <>
+      <FormSelect label="Membre" registration={registerFn("memberId")} error={errors.memberId} disabled={isSubmitting}>
+        <option value="">Sélectionner un membre</option>
+        {members?.map((m) => (
+          <option key={m._id} value={m._id}>
+            {m.firstName} {m.lastName}
+          </option>
+        ))}
+      </FormSelect>
+
+      <FormInput
+        label="Montant (TND)"
+        registration={registerFn("amount", { valueAsNumber: true })}
+        error={errors.amount}
+        type="number"
+        min={1}
+        step={0.001}
+        inputMode="numeric"
+        placeholder="50.000"
+        disabled={isSubmitting}
+      />
+
+      <div className="grid grid-cols-2 gap-4">
+        <FormSelect label="Mois couvert" registration={registerFn("monthCovered", { valueAsNumber: true })} disabled={isSubmitting}>
+          {[...Array(12)].map((_, i) => (
+            <option key={i + 1} value={i + 1}>
+              {new Date(2024, i, 1).toLocaleString("fr-FR", { month: "long" })}
+            </option>
+          ))}
+        </FormSelect>
+        <FormInput label="Année" registration={registerFn("yearCovered", { valueAsNumber: true })} type="number" inputMode="numeric" disabled={isSubmitting} />
+      </div>
+
+      <FormInput
+        label="Numéro de reçu"
+        registration={registerFn("receiptNumber")}
+        error={errors.receiptNumber}
+        placeholder="REC-001"
+        disabled={isSubmitting}
+      />
+
+      <div>
+        <label className="block text-sm font-medium text-foreground-secondary mb-1">Notes (optionnel)</label>
+        <textarea
+          {...registerFn("notes")}
+          rows={3}
+          className="input w-full"
+          placeholder="Commentaires sur le paiement..."
+          disabled={isSubmitting}
+        />
+      </div>
+    </>
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -219,58 +323,32 @@ export default function PaymentsPage() {
         onClose={() => setIsCreateModalOpen(false)}
         title="Nouveau Paiement"
         isSubmitting={isSubmitting}
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmitCreate(onCreateSubmit)}
         submitText="Enregistrer le paiement"
       >
-        <FormSelect label="Membre" registration={register("memberId")} error={errors.memberId} disabled={isSubmitting}>
-          <option value="">Sélectionner un membre</option>
-          {members?.map((m) => (
-            <option key={m._id} value={m._id}>
-              {m.firstName} {m.lastName}
-            </option>
-          ))}
-        </FormSelect>
+        <PaymentFormFields registerFn={registerCreate} errors={createErrors} />
+      </FormModal>
 
-        <FormInput
-          label="Montant (TND)"
-          registration={register("amount", { valueAsNumber: true })}
-          error={errors.amount}
-          type="number"
-          min={1}
-          step={0.001}
-          inputMode="numeric"
-          placeholder="50.000"
-          disabled={isSubmitting}
-        />
+      <FormModal
+        isOpen={!!editingPayment}
+        onClose={() => setEditingPayment(null)}
+        title="Modifier Paiement"
+        isSubmitting={isSubmitting}
+        onSubmit={handleSubmitUpdate(onUpdateSubmit)}
+        submitText="Mettre à jour"
+      >
+        <PaymentFormFields registerFn={registerUpdate} errors={updateErrors} />
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormSelect label="Mois couvert" registration={register("monthCovered", { valueAsNumber: true })} disabled={isSubmitting}>
-            {[...Array(12)].map((_, i) => (
-              <option key={i + 1} value={i + 1}>
-                {new Date(2024, i, 1).toLocaleString("fr-FR", { month: "long" })}
-              </option>
-            ))}
-          </FormSelect>
-          <FormInput label="Année" registration={register("yearCovered", { valueAsNumber: true })} type="number" inputMode="numeric" disabled={isSubmitting} />
-        </div>
-
-        <FormInput
-          label="Numéro de reçu"
-          registration={register("receiptNumber")}
-          error={errors.receiptNumber}
-          placeholder="REC-001"
-          disabled={isSubmitting}
-        />
-
-        <div>
-          <label className="block text-sm font-medium text-foreground-secondary mb-1">Notes (optionnel)</label>
-          <textarea
-            {...register("notes")}
-            rows={3}
-            className="input w-full"
-            placeholder="Commentaires sur le paiement..."
-            disabled={isSubmitting}
-          />
+        <div className="mt-4">
+          <button
+            type="button"
+            onClick={() => handleCancel(editingPayment)}
+            disabled={isSubmitting || editingPayment?.notes?.includes("ANNULÉ")}
+            className="w-full btn btn-warning disabled:opacity-50"
+          >
+            <Ban className="h-4 w-4 mr-2" />
+            {editingPayment?.notes?.includes("ANNULÉ") ? "Paiement déjà annulé" : "Annuler le reçu (Remboursement)"}
+          </button>
         </div>
       </FormModal>
 

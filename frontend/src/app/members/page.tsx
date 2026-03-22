@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, Plus, Edit, UserCircle, Phone, Calendar } from "lucide-react";
+import { Users, Plus, Edit, UserCircle, Phone, Calendar, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,7 +16,7 @@ import { FormSelect } from "@/components/FormSelect";
 import { SearchInput } from "@/components/SearchInput";
 
 export default function MembersPage() {
-  const { members, isSubmitting, createMember, updateMember, toggleStatus, modalProps } = useMembers();
+  const { members, isSubmitting, createMember, updateMember, deleteMember, toggleStatus, modalProps } = useMembers();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -194,6 +194,20 @@ export default function MembersPage() {
           <option value="female">Femme</option>
           <option value="other">Autre</option>
         </FormSelect>
+
+        <div className="mt-6 pt-4 border-t border-border">
+          <button
+            type="button"
+            onClick={async () => {
+              await deleteMember(editingMember, () => setEditingMember(null));
+            }}
+            disabled={isSubmitting}
+            className="w-full btn btn-danger disabled:opacity-50"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Supprimer cet adhérent
+          </button>
+        </div>
       </FormModal>
 
       <ConfirmModal {...modalProps} />

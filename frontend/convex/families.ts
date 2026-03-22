@@ -122,6 +122,24 @@ export const createFamily = mutation({
   },
 });
 
+export const deleteFamily = mutation({
+  args: { id: v.id("families"), deletedBy: v.optional(v.id("users")) },
+  handler: async (ctx, args) => {
+    const family = await ctx.db.get(args.id);
+    if (family && args.deletedBy) {
+      await ctx.db.insert("auditLog", {
+        userId: args.deletedBy,
+        action: "FAMILY_DELETED",
+        entityType: "family",
+        entityId: args.id,
+        details: `Famille supprimée: ${family.familyName}`,
+        createdAt: Date.now(),
+      });
+    }
+    await ctx.db.delete(args.id);
+  },
+});
+
 // Mutation: Mettre à jour une famille
 export const updateFamily = mutation({
   args: {

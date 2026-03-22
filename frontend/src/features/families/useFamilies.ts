@@ -12,6 +12,7 @@ export function useFamilies() {
 
     const createFamilyMutation = useMutation(api.families.createFamily);
     const updateFamilyMutation = useMutation(api.families.updateFamily);
+    const deleteFamilyMutation = useMutation(api.families.deleteFamily);
 
     const toast = useToastHelpers();
     const { confirm, modalProps } = useConfirmModal();
@@ -80,12 +81,37 @@ export function useFamilies() {
         }
     };
 
+    const deleteFamily = async (family: Doc<"families">, onSuccess?: () => void) => {
+        const isConfirmed = await confirm({
+            title: "Supprimer la famille",
+            message: `Êtes-vous sûr de vouloir supprimer la famille ${family.familyName} ? Cette action est irréversible.`,
+            type: "danger",
+            confirmText: "Oui, supprimer",
+            cancelText: "Annuler",
+        });
+
+        if (isConfirmed) {
+            setIsSubmitting(true);
+            try {
+                await deleteFamilyMutation({ id: family._id });
+                toast.success("Famille supprimée", "La famille a été supprimée avec succès.");
+                onSuccess?.();
+            } catch (error) {
+                console.error("Erreur suppression famille:", error);
+                toast.error("Erreur", "Impossible de supprimer la famille. Elle est peut-être liée à des membres.");
+            } finally {
+                setIsSubmitting(false);
+            }
+        }
+    };
+
     return {
         families,
         members,
         isSubmitting,
         createFamily,
         updateFamily,
+        deleteFamily,
         toggleStatus,
         modalProps,
     };

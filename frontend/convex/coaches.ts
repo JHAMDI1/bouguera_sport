@@ -58,6 +58,24 @@ export const updateCoach = mutation({
   },
 });
 
+export const deleteCoach = mutation({
+  args: { id: v.id("users"), deletedBy: v.optional(v.id("users")) },
+  handler: async (ctx, args) => {
+    const coach = await ctx.db.get(args.id);
+    if (coach && args.deletedBy) {
+      await ctx.db.insert("auditLog", {
+        userId: args.deletedBy,
+        action: "COACH_DELETED",
+        entityType: "user",
+        entityId: args.id,
+        details: `Coach supprimé: ${coach.fullName}`,
+        createdAt: Date.now(),
+      });
+    }
+    await ctx.db.delete(args.id);
+  },
+});
+
 export const createDiscipline = mutation({
   args: {
     name: v.string(),
@@ -99,6 +117,24 @@ export const updateDiscipline = mutation({
     const { id, ...updates } = args;
     await ctx.db.patch(id, updates);
     return id;
+  },
+});
+
+export const deleteDiscipline = mutation({
+  args: { id: v.id("disciplines"), deletedBy: v.optional(v.id("users")) },
+  handler: async (ctx, args) => {
+    const discipline = await ctx.db.get(args.id);
+    if (discipline && args.deletedBy) {
+      await ctx.db.insert("auditLog", {
+        userId: args.deletedBy,
+        action: "DISCIPLINE_DELETED",
+        entityType: "discipline",
+        entityId: args.id,
+        details: `Discipline supprimée: ${discipline.name}`,
+        createdAt: Date.now(),
+      });
+    }
+    await ctx.db.delete(args.id);
   },
 });
 
@@ -150,6 +186,24 @@ export const updateGroup = mutation({
   },
 });
 
+export const deleteGroup = mutation({
+  args: { id: v.id("groups"), deletedBy: v.optional(v.id("users")) },
+  handler: async (ctx, args) => {
+    const group = await ctx.db.get(args.id);
+    if (group && args.deletedBy) {
+      await ctx.db.insert("auditLog", {
+        userId: args.deletedBy,
+        action: "GROUP_DELETED",
+        entityType: "group",
+        entityId: args.id,
+        details: `Groupe supprimé: ${group.name}`,
+        createdAt: Date.now(),
+      });
+    }
+    await ctx.db.delete(args.id);
+  },
+});
+
 export const createExpense = mutation({
   args: {
     categoryId: v.id("expenseCategories"),
@@ -195,5 +249,23 @@ export const updateExpense = mutation({
     const { id, ...updates } = args;
     await ctx.db.patch(id, updates);
     return id;
+  },
+});
+
+export const deleteExpense = mutation({
+  args: { id: v.id("expenses") },
+  handler: async (ctx, args) => {
+    const expense = await ctx.db.get(args.id);
+    if (expense) {
+      await ctx.db.insert("auditLog", {
+        userId: expense.recordedBy,
+        action: "EXPENSE_DELETED",
+        entityType: "expense",
+        entityId: args.id,
+        details: `Dépense supprimée: ${expense.description} - ${expense.amount} TND`,
+        createdAt: Date.now(),
+      });
+    }
+    await ctx.db.delete(args.id);
   },
 });

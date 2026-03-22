@@ -15,6 +15,7 @@ export function useGroups() {
 
     const createGroupMutation = useMutation(api.coaches.createGroup);
     const updateGroupMutation = useMutation(api.coaches.updateGroup);
+    const deleteGroupMutation = useMutation(api.coaches.deleteGroup);
 
     const toast = useToastHelpers();
     const { confirm, modalProps } = useConfirmModal();
@@ -93,6 +94,34 @@ export function useGroups() {
         }
     };
 
+    const deleteGroup = async (group: Doc<"groups">, onSuccess?: () => void) => {
+        const isConfirmed = await confirm({
+            title: "Supprimer le groupe",
+            message: `Êtes-vous sûr de vouloir supprimer le groupe ${group.name} ? Cette action est irréversible.`,
+            type: "danger",
+            confirmText: "Oui, supprimer",
+            cancelText: "Annuler",
+        });
+
+        if (isConfirmed) {
+            setIsSubmitting(true);
+            try {
+                const currentUser = users?.[0];
+                await deleteGroupMutation({
+                    id: group._id,
+                    deletedBy: currentUser?._id
+                });
+                toast.success("Groupe supprimé", "Le groupe a été supprimé avec succès.");
+                onSuccess?.();
+            } catch (error) {
+                console.error("Erreur suppression groupe:", error);
+                toast.error("Erreur", "Impossible de supprimer le groupe.");
+            } finally {
+                setIsSubmitting(false);
+            }
+        }
+    };
+
     return {
         groups,
         disciplines,
@@ -102,6 +131,7 @@ export function useGroups() {
         isSubmitting,
         createGroup,
         updateGroup,
+        deleteGroup,
         toggleStatus,
         modalProps,
     };

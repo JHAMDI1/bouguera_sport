@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, Plus, Edit, Download, Percent, Phone } from "lucide-react";
+import { Users, Plus, Edit, Download, Percent, Phone, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +21,7 @@ import { FormInput } from "@/components/FormInput";
 import { SearchInput } from "@/components/SearchInput";
 
 export default function FamiliesPage() {
-  const { families, isSubmitting, createFamily, updateFamily, toggleStatus, modalProps } = useFamilies();
+  const { families, isSubmitting, createFamily, updateFamily, deleteFamily, toggleStatus, modalProps } = useFamilies();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingFamily, setEditingFamily] = useState<any>(null);
@@ -214,6 +214,20 @@ export default function FamiliesPage() {
             <input {...registerUpdate("isActive")} type="checkbox" className="rounded-none border-2 border-border text-primary-text" disabled={isSubmitting} />
             <span className="text-sm text-foreground-secondary">Famille active</span>
           </label>
+        </div>
+
+        <div className="mt-6 pt-4 border-t border-border">
+          <button
+            type="button"
+            onClick={async () => {
+              await deleteFamily(editingFamily, () => setEditingFamily(null));
+            }}
+            disabled={isSubmitting}
+            className="w-full btn btn-danger disabled:opacity-50"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Supprimer cette famille
+          </button>
         </div>
       </FormModal>
 

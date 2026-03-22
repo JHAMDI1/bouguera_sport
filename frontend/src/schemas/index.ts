@@ -113,3 +113,17 @@ export const sessionSchema = z.object({
 });
 
 export type SessionFormData = z.infer<typeof sessionSchema>;
+
+// --- Disciplines ---
+export const disciplineSchema = z.object({
+    name: z.string().min(2, "Nom de la discipline requis"),
+    description: z.string().optional(),
+    monthlyFee: z.number().min(0, "Tarif mensuel requis"),
+});
+
+export const updateDisciplineSchema = disciplineSchema.extend({
+    isActive: z.boolean(),
+});
+
+export type DisciplineFormData = z.infer<typeof disciplineSchema>;
+export type UpdateDisciplineFormData = z.infer<typeof updateDisciplineSchema>;

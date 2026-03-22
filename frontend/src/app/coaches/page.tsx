@@ -1,6 +1,6 @@
 "use client";
 
-import { UserCircle, Plus, Edit, Phone, Mail } from "lucide-react";
+import { UserCircle, Plus, Edit, Phone, Mail, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,7 +19,7 @@ import { FormModal } from "@/components/FormModal";
 import { FormInput } from "@/components/FormInput";
 
 export default function CoachesPage() {
-  const { coaches, isSubmitting, createCoach, updateCoach, toggleStatus, modalProps } = useCoaches();
+  const { coaches, isSubmitting, createCoach, updateCoach, deleteCoach, toggleStatus, modalProps } = useCoaches();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingCoach, setEditingCoach] = useState<any>(null);
@@ -163,6 +163,20 @@ export default function CoachesPage() {
             <input {...registerUpdate("isActive")} type="checkbox" className="rounded-none border-2 border-border text-primary-text" disabled={isSubmitting} />
             <span className="text-sm text-foreground-secondary">Actif</span>
           </label>
+        </div>
+
+        <div className="mt-6 pt-4 border-t border-border">
+          <button
+            type="button"
+            onClick={async () => {
+              await deleteCoach(editingCoach, () => setEditingCoach(null));
+            }}
+            disabled={isSubmitting}
+            className="w-full btn btn-danger disabled:opacity-50"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Supprimer ce coach
+          </button>
         </div>
       </FormModal>
 

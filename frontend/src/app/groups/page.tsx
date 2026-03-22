@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, Plus, Edit, Calendar, UserCircle } from "lucide-react";
+import { Users, Plus, Edit, Calendar, UserCircle, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +21,7 @@ import { FormSelect } from "@/components/FormSelect";
 import { getDisciplineName, getCoachName } from "@/lib/lookups";
 
 export default function GroupsPage() {
-  const { groups, disciplines, coaches, isSubmitting, createGroup, updateGroup, toggleStatus, modalProps } = useGroups();
+  const { groups, disciplines, coaches, isSubmitting, createGroup, updateGroup, deleteGroup, toggleStatus, modalProps } = useGroups();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<any>(null);
@@ -191,6 +191,20 @@ export default function GroupsPage() {
             <input {...registerUpdate("isActive")} type="checkbox" className="rounded-none border-2 border-border text-primary-text" disabled={isSubmitting} />
             <span className="text-sm text-foreground-secondary">Actif</span>
           </label>
+        </div>
+
+        <div className="mt-6 pt-4 border-t border-border">
+          <button
+            type="button"
+            onClick={async () => {
+              await deleteGroup(editingGroup, () => setEditingGroup(null));
+            }}
+            disabled={isSubmitting}
+            className="w-full btn btn-danger disabled:opacity-50"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Supprimer ce groupe
+          </button>
         </div>
       </FormModal>
 

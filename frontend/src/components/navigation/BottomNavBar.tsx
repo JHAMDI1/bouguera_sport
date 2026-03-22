@@ -11,7 +11,7 @@ export function BottomNavBar() {
     const mobileLinks = navigationLinks.slice(0, 5);
 
     return (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background-elevated border-t-2 border-border shadow-[0_-4px_0_var(--color-foreground)] pb-safe">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background-elevated/80 backdrop-blur-md border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-safe">
             <nav className="flex items-center justify-around h-16">
                 {mobileLinks.map((link) => {
                     const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);

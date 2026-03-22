@@ -10,6 +10,7 @@ export function useMembers() {
     const members = useQuery(api.members.getMembers, {});
     const createMemberMutation = useMutation(api.mutations.createMember);
     const updateMemberMutation = useMutation(api.mutations.updateMember);
+    const deleteMemberMutation = useMutation(api.mutations.deleteMember);
 
     const toast = useToastHelpers();
     const { confirm, modalProps } = useConfirmModal();
@@ -71,11 +72,36 @@ export function useMembers() {
         }
     };
 
+    const deleteMember = async (member: Doc<"members">, onSuccess?: () => void) => {
+        const isConfirmed = await confirm({
+            title: "Supprimer l'adhérent",
+            message: `Êtes-vous sûr de vouloir supprimer ${member.firstName} ${member.lastName} ? Cette action est irréversible et supprimera le membre de la base de données.`,
+            type: "danger",
+            confirmText: "Oui, supprimer",
+            cancelText: "Annuler",
+        });
+
+        if (isConfirmed) {
+            setIsSubmitting(true);
+            try {
+                await deleteMemberMutation({ id: member._id });
+                toast.success("Adhérent supprimé", "L'adhérent a été supprimé avec succès.");
+                onSuccess?.();
+            } catch (error) {
+                console.error("Erreur suppression adhérent:", error);
+                toast.error("Erreur", "Impossible de supprimer l'adhérent. Il est peut-être lié à des paiements.");
+            } finally {
+                setIsSubmitting(false);
+            }
+        }
+    };
+
     return {
         members,
         isSubmitting,
         createMember,
         updateMember,
+        deleteMember,
         toggleStatus,
         modalProps,
     };

@@ -1,61 +1,61 @@
 @import "tailwindcss";
 
 /* ============================================
-   DESIGN SYSTEM - Salle de Sport
-   Aesthetic: Industrial High-Energy (Neon Brutalism)
+   DESIGN SYSTEM - Sahbi Gym (SaaS Modern UI)
+   Aesthetic: Sleek, Premium, Trustworthy
    ============================================ */
 
 :root {
-  /* Neutral Colors - Industrial Concrete & Asphalt */
-  --gray-50: #f4f4f0;
-  --gray-100: #e6e6e2;
-  --gray-200: #d1d1cd;
-  --gray-300: #bcbcba;
-  --gray-400: #939391;
-  --gray-500: #717170;
-  --gray-600: #525251;
-  --gray-700: #3f3f3e;
-  --gray-800: #292928;
-  --gray-900: #171717;
-  --gray-950: #0a0a0a;
+  /* Neutral Colors - Sophisticated Slate/Zinc (Cool Grays) */
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+  --gray-950: #020617;
 
-  /* Primary Accent - Neon Volt */
-  --primary-50: #fcffeb;
-  --primary-100: #f6ffcc;
-  --primary-200: #eeff99;
-  --primary-300: #e5ff65;
-  --primary-400: #dbff33;
-  --primary-500: #d0ff00;
-  /* THE Volt */
-  --primary-600: #bce500;
-  --primary-700: #8fb300;
-  --primary-800: #6b8500;
-  --primary-900: #303d00;
-  --primary-950: #1a2100;
+  /* Primary Accent - Modern Indigo */
+  --primary-50: #eef2ff;
+  --primary-100: #e0e7ff;
+  --primary-200: #c7d2fe;
+  --primary-300: #a5b4fc;
+  --primary-400: #818cf8;
+  --primary-500: #6366f1;
+  /* Main Brand Color */
+  --primary-600: #4f46e5;
+  /* Main Brand Hover */
+  --primary-700: #4338ca;
+  --primary-800: #3730a3;
+  --primary-900: #312e81;
+  --primary-950: #1e1b4b;
 
-  /* Secondary Accent - High Alert Red/Orange */
-  --secondary-50: #fff4f2;
-  --secondary-100: #ffe5df;
-  --secondary-200: #ffc4ba;
-  --secondary-300: #ff9b8c;
-  --secondary-400: #ff6852;
-  --secondary-500: #ff3300;
-  /* Alert Orange/Red */
-  --secondary-600: #e52e00;
-  --secondary-700: #b32400;
-  --secondary-800: #8e1c00;
-  --secondary-900: #741a00;
-  --secondary-950: #3d0c00;
+  /* Secondary Accent - Soft Coral/Red */
+  --secondary-50: #fff1f2;
+  --secondary-100: #ffe4e6;
+  --secondary-500: #f43f5e;
+  --secondary-600: #e11d48;
 
-  /* Semantic - Status Colors with high saturation */
-  --success-500: #00ff66;
-  --success-950: #001f0c;
-  --error-500: #ff1a1a;
-  --error-950: #1a0000;
-  --warning-500: #ffaa00;
-  --warning-950: #1a1100;
-  --info-500: #00e5ff;
-  --info-950: #00171a;
+  /* Semantic - Status Colors */
+  --success-50: #f0fdf4;
+  --success-500: #22c55e;
+  --success-950: #052e16;
+
+  --error-50: #fef2f2;
+  --error-500: #ef4444;
+  --error-950: #450a0a;
+
+  --warning-50: #fffbeb;
+  --warning-500: #f59e0b;
+  --warning-950: #451a03;
+
+  --info-50: #eff6ff;
+  --info-500: #3b82f6;
+  --info-950: #082f49;
 
   /* ============================================
      THEME LIGHT (Default)
@@ -65,79 +65,82 @@
   --background-tertiary: var(--gray-100);
   --background-elevated: #ffffff;
 
-  --foreground: var(--gray-950);
+  --foreground: var(--gray-900);
   --foreground-secondary: var(--gray-700);
   --foreground-tertiary: var(--gray-600);
   --foreground-muted: var(--gray-500);
 
-  --border: var(--gray-950);
-  /* Stark borders for brutalism */
-  --border-subtle: var(--gray-300);
-  --border-strong: var(--gray-950);
+  --border: var(--gray-200);
+  --border-subtle: var(--gray-100);
+  --border-strong: var(--gray-300);
 
   /* Buttons and accents */
-  --primary: var(--primary-500);
-  --primary-hover: var(--primary-400);
-  --primary-active: var(--primary-600);
-  --primary-subtle: #ffffff;
+  --primary: var(--primary-600);
+  --primary-hover: var(--primary-700);
+  --primary-active: var(--primary-800);
+  --primary-subtle: var(--primary-50);
   --primary-subtle-hover: var(--primary-100);
-  --primary-text: var(--primary-800);
-  --on-primary: #000000;
+  --primary-text: var(--primary-600);
+  --on-primary: #ffffff;
 
   --secondary: var(--secondary-500);
-  --secondary-hover: var(--secondary-400);
-  --secondary-active: var(--secondary-600);
-  --secondary-subtle: #ffffff;
+  --secondary-hover: var(--secondary-600);
+  --secondary-active: var(--gray-800);
+  --secondary-subtle: var(--secondary-50);
   --on-secondary: #ffffff;
 
   --success: var(--success-500);
-  --success-subtle: #ffffff;
-  --on-success: #000000;
+  --success-subtle: var(--success-50);
+  --on-success: #ffffff;
   --error: var(--error-500);
-  --error-subtle: #ffffff;
+  --error-subtle: var(--error-50);
   --on-error: #ffffff;
   --warning: var(--warning-500);
-  --warning-subtle: #ffffff;
-  --on-warning: #000000;
+  --warning-subtle: var(--warning-50);
+  --on-warning: #ffffff;
   --info: var(--info-500);
-  --info-subtle: #ffffff;
-  --on-info: #000000;
+  --info-subtle: var(--info-50);
+  --on-info: #ffffff;
 
-  /* Sports Disciplines - High sat colors */
-  --discipline-taekwondo: #ff1a1a;
-  --discipline-kungfu: #ffaa00;
-  --discipline-kravmaga: #9d00ff;
-  --discipline-boxe: #0033ff;
-  --discipline-yoga: #00ff66;
-  --discipline-fitness: #00e5ff;
+  /* Sports Disciplines - Cleaned up palette */
+  --discipline-taekwondo: #ef4444;
+  --discipline-kungfu: #f59e0b;
+  --discipline-kravmaga: #8b5cf6;
+  --discipline-boxe: #3b82f6;
+  --discipline-yoga: #10b981;
+  --discipline-fitness: #06b6d4;
 
-  /* Hard Industrial Shadows */
-  --shadow-xs: 2px 2px 0px 0px var(--border);
-  --shadow-sm: 4px 4px 0px 0px var(--border);
-  --shadow-md: 6px 6px 0px 0px var(--border);
-  --shadow-lg: 8px 8px 0px 0px var(--border);
-  --shadow-xl: 12px 12px 0px 0px var(--border);
-  --shadow-inner: inset 2px 2px 0px 0px var(--border);
+  /* Soft Ambient Shadows (SaaS aesthetic) */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
 
-  /* Sharp Edges */
+  /* Vibrant Glow for Primary elements */
+  --shadow-primary: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
+
+  /* Modern Curves */
   --radius-none: 0px;
-  --radius-xs: 0px;
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-  --radius-2xl: 0px;
-  --radius-3xl: 0px;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  /* Standard for buttons/inputs */
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  /* Standard for cards */
+  --radius-3xl: 1.5rem;
   --radius-full: 9999px;
-  /* Only for pills/badges when strictly needed */
 
   /* Typography Variables */
   --font-sans-main: var(--font-sans), system-ui, sans-serif;
-  --font-display-main: var(--font-display), IMPACT, sans-serif;
+  --font-display-main: var(--font-sans), system-ui, sans-serif;
+  /* Unified minimal sans */
 
-  --transition-fast: 100ms cubic-bezier(0, 0, 0.2, 1);
-  --transition-base: 150ms cubic-bezier(0, 0, 0.2, 1);
-  --transition-slow: 200ms cubic-bezier(0, 0, 0.2, 1);
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ============================================
@@ -151,53 +154,40 @@
     --background-elevated: var(--gray-900);
 
     --foreground: #ffffff;
-    --foreground-secondary: var(--gray-100);
-    --foreground-tertiary: var(--gray-300);
-    --foreground-muted: var(--gray-400);
+    --foreground-secondary: var(--gray-300);
+    --foreground-tertiary: var(--gray-400);
+    --foreground-muted: var(--gray-500);
 
-    --border: var(--gray-700);
-    --border-subtle: var(--gray-800);
-    --border-strong: var(--gray-600);
+    --border: var(--gray-800);
+    --border-subtle: var(--gray-900);
+    --border-strong: var(--gray-700);
 
-    /* Volt pops immensely on black */
     --primary: var(--primary-500);
     --primary-hover: var(--primary-400);
     --primary-active: var(--primary-600);
-    --primary-subtle: var(--gray-900);
-    --primary-subtle-hover: var(--gray-800);
-    --primary-text: var(--primary-500);
-    --on-primary: #000000;
+    --primary-subtle: rgba(99, 102, 241, 0.15);
+    --primary-subtle-hover: rgba(99, 102, 241, 0.25);
+    --primary-text: var(--primary-400);
+    --on-primary: #ffffff;
 
     --secondary: var(--secondary-500);
     --secondary-hover: var(--secondary-400);
-    --secondary-active: var(--secondary-600);
-    --secondary-subtle: var(--gray-900);
-    --on-secondary: #000000;
-    /* better contrast on bright orange */
+    --secondary-active: var(--gray-700);
+    --secondary-subtle: rgba(244, 63, 94, 0.15);
+    --on-secondary: #ffffff;
 
-    --success: var(--success-500);
-    --success-subtle: var(--gray-900);
-    --on-success: #000000;
+    --success-subtle: rgba(34, 197, 94, 0.15);
+    --error-subtle: rgba(239, 68, 68, 0.15);
+    --warning-subtle: rgba(245, 158, 11, 0.15);
+    --info-subtle: rgba(59, 130, 246, 0.15);
 
-    --error: var(--error-500);
-    --error-subtle: var(--gray-900);
-    --on-error: #ffffff;
-
-    --warning: var(--warning-500);
-    --warning-subtle: var(--gray-900);
-    --on-warning: #000000;
-
-    --info: var(--info-500);
-    --info-subtle: var(--gray-900);
-    --on-info: #000000;
-
-    /* Hard Shadows - Colored for extra brutalist flair in dark mode */
-    --shadow-xs: 2px 2px 0px 0px var(--primary-800);
-    --shadow-sm: 4px 4px 0px 0px var(--primary-800);
-    --shadow-md: 6px 6px 0px 0px var(--primary-800);
-    --shadow-lg: 8px 8px 0px 0px var(--primary-800);
-    --shadow-xl: 12px 12px 0px 0px var(--primary-800);
-    --shadow-inner: inset 2px 2px 0px 0px var(--primary-800);
+    /* Dark Mode Shadows (mostly border-driven and deep ambient) */
+    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.5);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.5);
+    --shadow-primary: 0 4px 14px 0 rgba(99, 102, 241, 0.2);
   }
 }
 
@@ -249,6 +239,7 @@
   --color-info-subtle: var(--info-subtle);
   --color-on-info: var(--on-info);
 
+  /* Disciplines */
   --color-discipline-taekwondo: var(--discipline-taekwondo);
   --color-discipline-kungfu: var(--discipline-kungfu);
   --color-discipline-kravmaga: var(--discipline-kravmaga);
@@ -256,6 +247,7 @@
   --color-discipline-yoga: var(--discipline-yoga);
   --color-discipline-fitness: var(--discipline-fitness);
 
+  /* Neutrals mapped cleanly */
   --color-gray-50: var(--gray-50);
   --color-gray-100: var(--gray-100);
   --color-gray-200: var(--gray-200);
@@ -274,6 +266,7 @@
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
   --shadow-inner: var(--shadow-inner);
+  --shadow-primary: var(--shadow-primary);
 
   --radius-none: var(--radius-none);
   --radius-xs: var(--radius-xs);
@@ -287,7 +280,6 @@
 
   --font-sans: var(--font-sans-main);
   --font-display: var(--font-display-main);
-  /* Make Tailwind use the display font for all headings out of the box */
 }
 
 /* ============================================
@@ -309,6 +301,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Base Typographic Hierarchies (SaaS Style) */
 h1,
 h2,
 h3,
@@ -316,176 +309,169 @@ h4,
 h5,
 h6 {
   font-family: var(--font-display-main);
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  color: var(--foreground);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  /* Modern tight tracking */
 }
 
 /* ============================================
-   UTILITY CLASSES
+   UTILITY CLASSES (SaaS Modern)
    ============================================ */
 
-/* Card */
+/* Card - Soft, rounded, floating */
 .card {
   background: var(--background-elevated);
-  border: 2px solid var(--border);
-  border-radius: var(--radius-none);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-sm);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition: all var(--transition-base);
 }
 
 .card-hover:hover {
-  transform: translate(-2px, -2px);
+  border-color: var(--border-strong);
   box-shadow: var(--shadow-md);
 }
 
-/* Button Base */
+/* Button Base - Slight curves, nice interactions */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  min-height: 3rem;
-  font-family: var(--font-display-main);
-  font-size: 1.125rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  border: 2px solid var(--foreground);
-  border-radius: var(--radius-none);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
-  box-shadow: 4px 4px 0px 0px var(--foreground);
+  padding: 0.625rem 1.25rem;
+  min-height: 2.75rem;
+  /* slightly less tall than 3rem brutalism */
+  font-family: var(--font-sans-main);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-fast);
   cursor: pointer;
+  border: 1px solid transparent;
 }
 
 .btn:active {
-  transform: translate(2px, 2px);
-  box-shadow: 0px 0px 0px 0px var(--foreground);
+  transform: scale(0.98);
 }
 
 .btn-primary {
   background: var(--primary);
   color: var(--on-primary);
-  border-color: var(--foreground);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover {
   background: var(--primary-hover);
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px var(--foreground);
+  box-shadow: var(--shadow-primary);
 }
 
 .btn-secondary {
-  background: var(--secondary);
-  color: var(--on-secondary);
+  background: var(--background-elevated);
+  color: var(--foreground-secondary);
+  border-color: var(--border);
+  box-shadow: var(--shadow-xs);
 }
 
 .btn-secondary:hover {
-  background: var(--secondary-hover);
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px var(--foreground);
+  background: var(--background-tertiary);
+  color: var(--foreground);
+  border-color: var(--border-strong);
 }
 
 .btn-danger {
   background: var(--error);
   color: var(--on-error);
-  border-color: var(--foreground);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-danger:hover {
-  background: var(--error);
-  filter: brightness(0.9);
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px var(--foreground);
+  background: #dc2626;
+  /* error-600 */
 }
 
 .btn-subtle {
-  background: var(--background-tertiary);
-  color: var(--foreground);
-  box-shadow: 2px 2px 0px 0px var(--foreground);
+  background: transparent;
+  color: var(--foreground-secondary);
 }
 
 .btn-subtle:hover {
-  background: var(--border-subtle);
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0px 0px var(--foreground);
+  background: var(--background-tertiary);
+  color: var(--foreground);
 }
 
-/* Input */
+/* Input - Clean, focus rings */
 .input {
-  background: var(--background);
-  border: 2px solid var(--border-strong);
-  border-radius: var(--radius-none);
-  padding: 0.75rem 1rem;
-  min-height: 3rem;
+  background: var(--background-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 0.625rem 1rem;
+  min-height: 2.75rem;
   color: var(--foreground);
   font-family: var(--font-sans-main);
-  font-weight: 500;
+  font-size: 0.875rem;
   transition: all var(--transition-fast);
-  box-shadow: inset 2px 2px 0px 0px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-xs);
+}
+
+.input:hover {
+  border-color: var(--border-strong);
 }
 
 .input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 4px 4px 0px 0px var(--primary);
-  transform: translate(-2px, -2px);
+  box-shadow: inset 0 0 0 1px var(--primary);
+  /* Inner ring simulating thick focus */
 }
 
 .input::placeholder {
   color: var(--foreground-muted);
 }
 
-/* Badge */
+/* Badge - Soft pills */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.25rem 0.75rem;
-  font-family: var(--font-display-main);
-  font-size: 0.875rem;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  border: 1px solid var(--foreground);
-  border-radius: var(--radius-none);
-  box-shadow: 2px 2px 0px 0px var(--foreground);
+  padding: 0.125rem 0.625rem;
+  font-family: var(--font-sans-main);
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: var(--radius-full);
 }
 
 .badge-success {
-  background: var(--success);
-  color: var(--on-success);
+  background: var(--success-subtle);
+  color: var(--success);
 }
 
 .badge-error {
-  background: var(--error);
-  color: var(--on-error);
+  background: var(--error-subtle);
+  color: var(--error);
 }
 
 .badge-warning {
-  background: var(--warning);
-  color: var(--on-warning);
+  background: var(--warning-subtle);
+  color: var(--warning);
 }
 
 .badge-info {
-  background: var(--info);
-  color: var(--on-info);
+  background: var(--info-subtle);
+  color: var(--info);
 }
 
-/* Status indicators for disciplines */
+/* Discipline Badge */
 .discipline-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.375rem 1rem;
-  font-family: var(--font-display-main);
-  font-size: 1rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  border: 2px solid var(--foreground);
-  border-radius: var(--radius-none);
-  box-shadow: 3px 3px 0px 0px var(--foreground);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
   color: #fff;
-  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
-  /* contrast booster */
+  box-shadow: var(--shadow-sm);
 }
 
 .discipline-taekwondo {
@@ -494,6 +480,7 @@ h6 {
 
 .discipline-kungfu {
   background: var(--discipline-kungfu);
+  color: #000;
 }
 
 .discipline-kravmaga {
@@ -512,37 +499,38 @@ h6 {
   background: var(--discipline-fitness);
 }
 
-/* Table */
+/* Table - Clean SaaS grids */
 .table-container {
-  border: 2px solid var(--border-strong);
-  border-radius: var(--radius-none);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
+  background: var(--background-elevated);
 }
 
 .table {
   width: 100%;
-  border-collapse: separate;
-  /* Required for borders to show right on brutalism */
-  border-spacing: 0;
+  border-collapse: collapse;
 }
 
 .table th {
-  background: var(--foreground);
-  color: var(--background);
-  font-family: var(--font-display-main);
-  font-size: 1.125rem;
-  letter-spacing: 1px;
+  background: var(--background-tertiary);
+  color: var(--foreground-secondary);
+  font-family: var(--font-sans-main);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   text-align: left;
-  padding: 1rem;
-  border-bottom: 2px solid var(--border-strong);
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid var(--border);
 }
 
 .table td {
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
-  font-weight: 500;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.875rem;
+  color: var(--foreground);
 }
 
 .table tr:last-child td {
@@ -551,41 +539,39 @@ h6 {
 
 .table tr:hover td {
   background: var(--background-tertiary);
-  color: var(--foreground);
-  cursor: pointer;
 }
 
-/* Focus styles */
-.focus-ring:focus-visible {
+/* Focus styles - Elegant ring */
+.focus-ring:focus-visible,
+*:focus-visible {
   outline: none;
-  box-shadow: inset 0 0 0 2px var(--background), 0 0 0 4px var(--primary);
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--primary-300) !important;
 }
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--background-secondary);
-  border-left: 2px solid var(--border);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--foreground);
-  border: 2px solid var(--background-secondary);
+  background: var(--border-strong);
+  border-radius: var(--radius-full);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary);
+  background: var(--foreground-muted);
 }
 
 /* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(5px);
   }
 
   to {
@@ -595,15 +581,14 @@ h6 {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.2s cubic-bezier(0, 0, 0.2, 1);
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Loading skeleton */
 .skeleton {
   background: var(--background-tertiary);
-  border: 1px solid var(--border-subtle);
-  animation: pulse-op 1.5s infinite;
-  border-radius: var(--radius-none);
+  animation: pulse-op 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  border-radius: var(--radius-md);
 }
 
 @keyframes pulse-op {

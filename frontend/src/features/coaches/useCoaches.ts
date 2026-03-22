@@ -11,6 +11,7 @@ export function useCoaches() {
 
     const createCoachMutation = useMutation(api.coaches.createCoach);
     const updateCoachMutation = useMutation(api.coaches.updateCoach);
+    const deleteCoachMutation = useMutation(api.coaches.deleteCoach);
 
     const toast = useToastHelpers();
     const { confirm, modalProps } = useConfirmModal();
@@ -80,11 +81,36 @@ export function useCoaches() {
         }
     };
 
+    const deleteCoach = async (coach: Doc<"users">, onSuccess?: () => void) => {
+        const isConfirmed = await confirm({
+            title: "Supprimer le coach",
+            message: `Êtes-vous sûr de vouloir supprimer le coach ${coach.fullName} ? Cette action est irréversible.`,
+            type: "danger",
+            confirmText: "Oui, supprimer",
+            cancelText: "Annuler",
+        });
+
+        if (isConfirmed) {
+            setIsSubmitting(true);
+            try {
+                await deleteCoachMutation({ id: coach._id });
+                toast.success("Coach supprimé", "Le coach a été supprimé avec succès.");
+                onSuccess?.();
+            } catch (error) {
+                console.error("Erreur suppression coach:", error);
+                toast.error("Erreur", "Impossible de supprimer le coach. Il/elle a peut-être des groupes.");
+            } finally {
+                setIsSubmitting(false);
+            }
+        }
+    };
+
     return {
         coaches,
         isSubmitting,
         createCoach,
         updateCoach,
+        deleteCoach,
         toggleStatus,
         modalProps,
     };

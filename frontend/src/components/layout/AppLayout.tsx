@@ -18,13 +18,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <Sidebar />
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
                 {/* Uniquement visible sur mobile : un header avec le bouton User */}
-                <div className="md:hidden h-14 bg-background-elevated border-b-2 border-border flex items-center justify-between px-4 z-20 shadow-[0_2px_0_var(--color-foreground)]">
-                    <span className="font-display text-xl tracking-wider text-primary-text">SAHBI GYM</span>
+                <div className="md:hidden h-14 bg-background-elevated/80 backdrop-blur-md border-b border-border flex items-center justify-between px-4 z-20 shadow-sm sticky top-0">
+                    <span className="font-display font-bold text-lg tracking-tight text-foreground">Sahbi Gym</span>
                     <UserButton />
                 </div>
 
                 {/* Header Desktop User Button (absolute top right of main content) */}
-                <div className="hidden md:block absolute top-4 right-8 z-20 shadow-[2px_2px_0_var(--color-foreground)] border-2 border-foreground rounded-full bg-background-elevated h-[36px] w-[36px]">
+                <div className="hidden md:block absolute top-6 right-8 z-20 shadow-sm hover:shadow-md transition-shadow border border-border rounded-full bg-background-elevated h-[36px] w-[36px]">
                     <UserButton />
                 </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { TrendingDown, Plus, FileText } from "lucide-react";
+import { TrendingDown, Plus, FileText, Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,9 +14,10 @@ import { FormInput } from "@/components/FormInput";
 import { FormSelect } from "@/components/FormSelect";
 
 export default function ExpensesPage() {
-  const { expenses, categories, isSubmitting, createExpense, getCategoryName, getRecordedByName, modalProps } = useExpenses();
+  const { expenses, categories, isSubmitting, createExpense, updateExpense, deleteExpense, getCategoryName, getRecordedByName, modalProps } = useExpenses();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<any>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
 
   const currentMonth = new Date().getMonth() + 1;
@@ -34,19 +35,53 @@ export default function ExpensesPage() {
     : expenses;
 
   const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
+    register: registerCreate,
+    handleSubmit: handleSubmitCreate,
+    reset: resetCreate,
+    formState: { errors: createErrors },
   } = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
     defaultValues: { expenseDate: Date.now() },
   });
 
-  const onSubmit = async (data: ExpenseFormData) => {
+  const {
+    register: registerUpdate,
+    handleSubmit: handleSubmitUpdate,
+    reset: resetUpdate,
+    formState: { errors: updateErrors },
+  } = useForm<ExpenseFormData>({
+    resolver: zodResolver(expenseSchema),
+  });
+
+  const onCreateSubmit = async (data: ExpenseFormData) => {
     await createExpense(data, () => {
       setIsCreateModalOpen(false);
-      reset({ expenseDate: Date.now() });
+      resetCreate({ expenseDate: Date.now() });
+    });
+  };
+
+  const onUpdateSubmit = async (data: ExpenseFormData) => {
+    if (!editingExpense) return;
+    await updateExpense(editingExpense._id, data, () => {
+      setEditingExpense(null);
+      resetUpdate();
+    });
+  };
+
+  const handleEdit = (expense: any) => {
+    setEditingExpense(expense);
+    resetUpdate({
+      categoryId: expense.categoryId,
+      description: expense.description,
+      amount: expense.amount,
+      expenseDate: expense.expenseDate,
+      receiptUrl: expense.receiptUrl || "",
+    });
+  };
+
+  const handleDelete = async (expense: any) => {
+    await deleteExpense(expense, () => {
+      setEditingExpense(null);
     });
   };
 
@@ -89,8 +124,47 @@ export default function ExpensesPage() {
           {getRecordedByName(expense.recordedBy)}
         </span>
       )
+    },
+    {
+      header: "Actions",
+      className: "text-right",
+      accessor: (expense) => (
+        <button
+          onClick={() => handleEdit(expense)}
+          className="text-primary-text hover:text-primary-active transition-colors p-2"
+        >
+          <Edit className="h-4 w-4" />
+        </button>
+      )
     }
   ];
+
+  const ExpenseFormFields = ({ registerFn, errors }: { registerFn: any; errors: any }) => (
+    <>
+      <FormSelect label="Catégorie" registration={registerFn("categoryId")} error={errors.categoryId} disabled={isSubmitting}>
+        <option value="">Sélectionner une catégorie</option>
+        {categories?.map((c) => (
+          <option key={c._id} value={c._id}>{c.name}</option>
+        ))}
+      </FormSelect>
+
+      <FormInput label="Description" registration={registerFn("description")} error={errors.description} placeholder="Loyer, électricité, matériel..." disabled={isSubmitting} />
+      <FormInput label="Montant (TND)" registration={registerFn("amount", { valueAsNumber: true })} error={errors.amount} type="number" min={0.001} step={0.001} inputMode="decimal" placeholder="500.000" disabled={isSubmitting} />
+
+      <FormInput
+        label="Date de dépense"
+        registration={registerFn("expenseDate", {
+          valueAsNumber: true,
+          onChange: (e: any) => new Date(e.target.value).getTime(),
+        })}
+        error={errors.expenseDate}
+        type="date"
+        disabled={isSubmitting}
+      />
+
+      <FormInput label="URL du reçu (optionnel)" registration={registerFn("receiptUrl")} error={errors.receiptUrl} placeholder="https://..." disabled={isSubmitting} />
+    </>
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -138,31 +212,33 @@ export default function ExpensesPage() {
         onClose={() => setIsCreateModalOpen(false)}
         title="Nouvelle Dépense"
         isSubmitting={isSubmitting}
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmitCreate(onCreateSubmit)}
         submitText="Enregistrer"
       >
-        <FormSelect label="Catégorie" registration={register("categoryId")} error={errors.categoryId} disabled={isSubmitting}>
-          <option value="">Sélectionner une catégorie</option>
-          {categories?.map((c) => (
-            <option key={c._id} value={c._id}>{c.name}</option>
-          ))}
-        </FormSelect>
+        <ExpenseFormFields registerFn={registerCreate} errors={createErrors} />
+      </FormModal>
 
-        <FormInput label="Description" registration={register("description")} error={errors.description} placeholder="Loyer, électricité, matériel..." disabled={isSubmitting} />
-        <FormInput label="Montant (TND)" registration={register("amount", { valueAsNumber: true })} error={errors.amount} type="number" min={0.001} step={0.001} inputMode="decimal" placeholder="500.000" disabled={isSubmitting} />
+      <FormModal
+        isOpen={!!editingExpense}
+        onClose={() => setEditingExpense(null)}
+        title="Modifier Dépense"
+        isSubmitting={isSubmitting}
+        onSubmit={handleSubmitUpdate(onUpdateSubmit)}
+        submitText="Mettre à jour"
+      >
+        <ExpenseFormFields registerFn={registerUpdate} errors={updateErrors} />
 
-        <FormInput
-          label="Date de dépense"
-          registration={register("expenseDate", {
-            valueAsNumber: true,
-            onChange: (e) => new Date(e.target.value).getTime(),
-          })}
-          error={errors.expenseDate}
-          type="date"
-          disabled={isSubmitting}
-        />
-
-        <FormInput label="URL du reçu (optionnel)" registration={register("receiptUrl")} error={errors.receiptUrl} placeholder="https://..." disabled={isSubmitting} />
+        <div className="mt-4">
+          <button
+            type="button"
+            onClick={() => handleDelete(editingExpense)}
+            disabled={isSubmitting}
+            className="w-full btn btn-danger disabled:opacity-50"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Supprimer cette dépense
+          </button>
+        </div>
       </FormModal>
 
       <ConfirmModal {...modalProps} />
