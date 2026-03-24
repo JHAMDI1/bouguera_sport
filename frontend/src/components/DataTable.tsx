@@ -56,7 +56,7 @@ export function DataTable<T>({
                             if (value === null || value === undefined) return null;
 
                             return (
-                                <div key={i} className={`flex flex-col ${col.className?.includes('right') ? 'items-start' : ''}`}>
+                                <div key={i} className={`flex flex-col ${col.className?.includes('right') ? 'items-end' : ''}`}>
                                     <span className="text-xs text-foreground-secondary mb-1 uppercase tracking-wider font-bold">
                                         {col.header}
                                     </span>

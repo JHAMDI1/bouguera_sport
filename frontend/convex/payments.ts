@@ -225,3 +225,42 @@ export const getExpenseCategories = query({
     return await ctx.db.query("expenseCategories").collect();
   },
 });
+
+export const createExpenseCategory = mutation({
+  args: {
+    name: v.string(),
+    description: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.insert("expenseCategories", {
+      ...args,
+      createdAt: Date.now(),
+    });
+  },
+});
+
+export const updateExpenseCategory = mutation({
+  args: {
+    id: v.id("expenseCategories"),
+    name: v.optional(v.string()),
+    description: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { id, ...updates } = args;
+    await ctx.db.patch(id, updates);
+    return id;
+  },
+});
+
+export const deleteExpenseCategory = mutation({
+  args: { id: v.id("expenseCategories") },
+  handler: async (ctx, args) => {
+    const expenses = await ctx.db.query("expenses")
+      .withIndex("by_categoryId", (q) => q.eq("categoryId", args.id))
+      .first();
+    if (expenses) {
+      throw new Error("Impossible de supprimer une catégorie contenant des dépenses");
+    }
+    await ctx.db.delete(args.id);
+  },
+});

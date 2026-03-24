@@ -138,6 +138,7 @@ export default function CoachesPage() {
     <div className="min-h-screen bg-background">
       <PageHeader
         title="Staff & Coachs"
+        showBack={true}
         icon={<UserCircle className="h-6 w-6" />}
         action={
           <button onClick={() => setIsCreateModalOpen(true)} className="btn btn-primary">

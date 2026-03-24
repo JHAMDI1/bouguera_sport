@@ -89,6 +89,66 @@ export function useExpenses() {
         }
     };
 
+    const createCategoryMutation = useMutation(api.payments.createExpenseCategory);
+    const updateCategoryMutation = useMutation(api.payments.updateExpenseCategory);
+    const deleteCategoryMutation = useMutation(api.payments.deleteExpenseCategory);
+
+    const createCategory = async (name: string, description?: string, onSuccess?: () => void) => {
+        setIsSubmitting(true);
+        try {
+            await createCategoryMutation({ name, description });
+            toast.success("Catégorie créée", `La catégorie "${name}" a été ajoutée`);
+            onSuccess?.();
+            return true;
+        } catch (error) {
+            console.error("Erreur création catégorie:", error);
+            toast.error("Erreur", "Impossible de créer la catégorie");
+            return false;
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const updateCategory = async (id: any, name: string, description?: string, onSuccess?: () => void) => {
+        setIsSubmitting(true);
+        try {
+            await updateCategoryMutation({ id, name, description });
+            toast.success("Catégorie modifiée", `La catégorie a été mise à jour`);
+            onSuccess?.();
+            return true;
+        } catch (error) {
+            console.error("Erreur modification catégorie:", error);
+            toast.error("Erreur", "Impossible de modifier la catégorie");
+            return false;
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const deleteCategory = async (category: any, onSuccess?: () => void) => {
+        const isConfirmed = await confirm({
+            title: "Supprimer la catégorie",
+            message: `Êtes-vous sûr de vouloir supprimer la catégorie "${category.name}" ? Vous ne pouvez pas supprimer une catégorie qui contient déjà des dépenses.`,
+            type: "danger",
+            confirmText: "Oui, supprimer",
+            cancelText: "Annuler",
+        });
+
+        if (isConfirmed) {
+            setIsSubmitting(true);
+            try {
+                await deleteCategoryMutation({ id: category._id });
+                toast.success("Catégorie supprimée", "La catégorie a été supprimée avec succès");
+                onSuccess?.();
+            } catch (error: any) {
+                console.error("Erreur suppression catégorie:", error);
+                toast.error("Erreur", error.message || "Impossible de supprimer la catégorie abordée");
+            } finally {
+                setIsSubmitting(false);
+            }
+        }
+    };
+
     const getCategoryName = (id: string) => categories?.find((c) => c._id === id)?.name || "Inconnu";
     const getRecordedByName = (id: string) => users?.find((u) => u._id === id)?.fullName || "Inconnu";
 
@@ -100,6 +160,9 @@ export function useExpenses() {
         createExpense,
         updateExpense,
         deleteExpense,
+        createCategory,
+        updateCategory,
+        deleteCategory,
         getCategoryName,
         getRecordedByName,
         modalProps,

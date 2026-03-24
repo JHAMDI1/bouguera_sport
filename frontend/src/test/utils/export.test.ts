@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { describe, it, expect } from 'vitest';
 import { exportToCSV } from '../../lib/export';
 
@@ -40,7 +41,7 @@ describe('Date Utilities', () => {
   it('formats date correctly', () => {
     const timestamp = new Date('2024-03-20T10:30:00').getTime();
     const date = new Date(timestamp);
-    
+
     expect(date.getFullYear()).toBe(2024);
     expect(date.getMonth()).toBe(2); // March (0-indexed)
     expect(date.getDate()).toBe(20);
@@ -51,7 +52,7 @@ describe('Date Utilities', () => {
     const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
     const diffMs = now - thirtyDaysAgo;
     const diffDays = Math.floor(diffMs / (24 * 60 * 60 * 1000));
-    
+
     expect(diffDays).toBe(30);
   });
 });
@@ -63,7 +64,7 @@ describe('Currency Utilities', () => {
       style: 'currency',
       currency: 'MAD',
     }).format(amount);
-    
+
     expect(formatted).toContain('450');
     expect(formatted).toContain('MAD');
   });

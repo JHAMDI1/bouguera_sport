@@ -156,6 +156,7 @@ export default function SchedulePage() {
     <div className="min-h-screen bg-background">
       <PageHeader
         title="Planning des Cours"
+        showBack={true}
         icon={<Calendar className="h-6 w-6" />}
         action={
           <button onClick={() => setIsCreateModalOpen(true)} className="btn btn-primary">

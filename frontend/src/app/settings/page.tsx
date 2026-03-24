@@ -61,6 +61,7 @@ export default function SettingsPage() {
         <div className="space-y-6">
             <PageHeader
                 title="Paramètres SaaS"
+                showBack={true}
                 description="Configuration globale de la salle de sport (Nom, Devise, Taxes)"
                 icon={<SettingsIcon className="h-6 w-6" />}
             />

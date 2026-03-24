@@ -1,6 +1,6 @@
 "use client";
 
-import { TrendingDown, Plus, FileText, Edit, Trash2 } from "lucide-react";
+import { TrendingDown, Plus, FileText, Edit, Trash2, Settings } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,11 +16,15 @@ import { Avatar } from "@/components/Avatar";
 import { DropdownMenu, DropdownItem } from "@/components/DropdownMenu";
 
 export default function ExpensesPage() {
-  const { expenses, categories, isSubmitting, createExpense, updateExpense, deleteExpense, getCategoryName, getRecordedByName, modalProps } = useExpenses();
+  const { expenses, categories, isSubmitting, createExpense, updateExpense, deleteExpense, createCategory, updateCategory, deleteCategory, getCategoryName, getRecordedByName, modalProps } = useExpenses();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<any>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [editingCategory, setEditingCategory] = useState<any>(null);
 
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
@@ -175,6 +179,7 @@ export default function ExpensesPage() {
     <div className="min-h-screen bg-background">
       <PageHeader
         title="Gestion des Dépenses"
+        showBack={true}
         icon={<TrendingDown className="h-6 w-6" />}
         action={
           <button onClick={() => setIsCreateModalOpen(true)} className="btn btn-primary">
@@ -190,7 +195,7 @@ export default function ExpensesPage() {
       </PageHeader>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
+        <div className="mb-6 flex flex-wrap items-center gap-4">
           <select
             className="input w-64"
             value={selectedCategory}
@@ -201,6 +206,10 @@ export default function ExpensesPage() {
               <option key={cat._id} value={cat._id}>{cat.name}</option>
             ))}
           </select>
+          <button onClick={() => setIsCategoryModalOpen(true)} className="btn btn-secondary text-sm">
+            <Settings className="w-4 h-4 mr-2" />
+            Gérer les catégories
+          </button>
         </div>
 
         <DataTable
@@ -243,6 +252,43 @@ export default function ExpensesPage() {
             <Trash2 className="h-4 w-4 mr-2" />
             Supprimer cette dépense
           </button>
+        </div>
+      </FormModal>
+
+      <FormModal
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+        title="Gérer les catégories"
+        isSubmitting={isSubmitting}
+        submitText="Fermer"
+        onSubmit={async () => setIsCategoryModalOpen(false)}
+      >
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <input className="input flex-1" placeholder="Nouvelle catégorie..." value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} disabled={isSubmitting} />
+            <button type="button" className="btn btn-primary" disabled={isSubmitting || !newCategoryName.trim()} onClick={async () => { await createCategory(newCategoryName); setNewCategoryName(""); }}>Ajouter</button>
+          </div>
+          <div className="space-y-2 mt-4 max-h-64 overflow-y-auto pr-1">
+            {categories?.map(c => (
+              <div key={c._id} className="flex items-center justify-between p-2 border border-border rounded-lg bg-background-tertiary">
+                {editingCategory?._id === c._id ? (
+                  <div className="flex items-center gap-2 w-full">
+                    <input className="input flex-1" value={editingCategory.name} onChange={e => setEditingCategory({ ...editingCategory, name: e.target.value })} autoFocus disabled={isSubmitting} />
+                    <button type="button" className="btn btn-primary btn-sm" disabled={isSubmitting || !editingCategory.name.trim()} onClick={async () => { await updateCategory(c._id, editingCategory.name); setEditingCategory(null); }}>OK</button>
+                    <button type="button" className="btn btn-subtle btn-sm" disabled={isSubmitting} onClick={() => setEditingCategory(null)}>Annuler</button>
+                  </div>
+                ) : (
+                  <>
+                    <span className="font-medium text-sm">{c.name}</span>
+                    <div className="flex items-center gap-1">
+                      <button type="button" className="p-1 text-foreground-secondary hover:text-primary-text" disabled={isSubmitting} onClick={() => setEditingCategory(c)}> <Edit className="w-4 h-4" /> </button>
+                      <button type="button" className="p-1 text-foreground-secondary hover:text-error" disabled={isSubmitting} onClick={() => deleteCategory(c)}> <Trash2 className="w-4 h-4" /> </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </FormModal>
 
