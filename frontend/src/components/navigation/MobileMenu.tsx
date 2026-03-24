@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, Dumbbell } from "lucide-react";
@@ -9,8 +10,13 @@ import { useUserRole } from "@/hooks/useUserRole";
 
 export function MobileMenu() {
     const [isOpen, setIsOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
     const pathname = usePathname();
     const { role } = useUserRole();
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const links = navigationLinks.filter((link) => role && link.roles.includes(role));
 
@@ -23,7 +29,7 @@ export function MobileMenu() {
                 <Menu className="h-6 w-6" />
             </button>
 
-            {isOpen && (
+            {isOpen && mounted && createPortal(
                 <div className="fixed inset-0 z-[100] flex">
                     <div
                         className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
@@ -54,8 +60,8 @@ export function MobileMenu() {
                                         href={link.href}
                                         onClick={() => setIsOpen(false)}
                                         className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all ${isActive
-                                                ? "bg-primary text-on-primary shadow-md"
-                                                : "bg-transparent text-foreground-secondary hover:text-foreground hover:bg-background-tertiary"
+                                            ? "bg-primary text-on-primary shadow-md"
+                                            : "bg-transparent text-foreground-secondary hover:text-foreground hover:bg-background-tertiary"
                                             }`}
                                     >
                                         <Icon className={`mr-3 h-5 w-5 ${isActive ? "text-on-primary" : "text-foreground-muted"}`} />
@@ -65,7 +71,8 @@ export function MobileMenu() {
                             })}
                         </nav>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     );
