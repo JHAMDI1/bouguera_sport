@@ -68,3 +68,28 @@ export const syncUser = mutation({
     });
   }
 });
+
+import { internalMutation } from "./_generated/server";
+
+export const forceUpgrade = internalMutation({
+  args: { email: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .first();
+    if (user) {
+      await ctx.db.patch(user._id, { role: "superadmin" });
+      return "Upgraded existing user";
+    } else {
+      await ctx.db.insert("users", {
+        email: args.email,
+        role: "superadmin",
+        fullName: "Admin",
+        isActive: true,
+        createdAt: Date.now(),
+      });
+      return "Created superadmin user";
+    }
+  }
+});
