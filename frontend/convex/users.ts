@@ -42,7 +42,9 @@ export const syncUser = mutation({
       .first();
 
     if (existingUser) {
-      if (email === "sahbibouguerra186@gmail.com" && existingUser.role !== "superadmin") {
+      const isSuperAdmin = email === "sahbibouguerra186@gmail.com" || email === "soltanwerghi@gmail.com";
+
+      if (isSuperAdmin && existingUser.role !== "superadmin") {
         await ctx.db.patch(existingUser._id, { role: "superadmin" });
       }
       // Si la photo a changé, on peut mettre à jour aussi
@@ -52,7 +54,8 @@ export const syncUser = mutation({
       return existingUser._id;
     }
 
-    const role = email === "sahbibouguerra186@gmail.com" ? "superadmin" : "coach";
+    const isSuperAdmin = email === "sahbibouguerra186@gmail.com" || email === "soltanwerghi@gmail.com";
+    const role = isSuperAdmin ? "superadmin" : "coach";
 
     return await ctx.db.insert("users", {
       clerkId: subject,
