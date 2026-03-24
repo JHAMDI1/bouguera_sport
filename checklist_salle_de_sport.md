@@ -1,8 +1,8 @@
 # 🏋️ Application de Gestion de Salle de Sport — Checklist Complète
 
-> **Stack technologique :** React/Next.js (Frontend) + **Convex** (Données Temps Réel) + **Rust / Actix-Web** (Logique complexe & API Sécurisée)
+> **Stack technologique :** React/Next.js (Frontend) + **Convex** (Backend & Données Temps Réel)
 > **Date de création :** 20 Mars 2026
-> **Dernière mise à jour :** 21 Mars 2026 (Architect Review)
+> **Dernière mise à jour :** 24 Mars 2026 (Mise à jour Architecture)
 
 ---
 
@@ -48,27 +48,27 @@
 
 ---
 
-## 🏗️ Architecture Proposée (Hybride Convex + Rust)
+## 🏗️ Architecture Proposée (Convex Native)
 
-```
+```text
 ┌──────────────────────────────────────────────────┐
 │                   Frontend Web                    │
 │               (React / Next.js)                   │
 │  ┌─────────┐ ┌─────────────┐ ┌────────────────┐  │
 │  │   UI    │ │  Hooks (db) │ │    Requêtes    │  │
-│  │(Tailwind) │ │(useQuery)   │ │  (Fetch API)   │  │
+│  │(Tailwind) │ │(useQuery)   │ │  (Mutations)   │  │
 │  └─────────┘ └─────────────┘ └────────────────┘  │
 └───────┬───────────────────────────────┬──────────┘
-        │ WebSocket (Temps réel)        │ HTTP/REST (Logique complexe & Auth)
-┌───────▼──────────────────────────┐ ┌──▼───────────────────────────────┐
-│          Convex Backend          │ │         Backend Rust (Actix)      │
-│  ┌─────────┐ ┌────────────────┐  │ │ ┌─────────┐ ┌──────────────────┐ │
-│  │ Queries │ │ Mutations (UI) │◄─┼─┼─┤  Routes │ │ Business Logic   │ │
-│  └─────────┘ └────────────────┘  │ │ └─────────┘ │(Paiements, Docs) │ │
-│  ┌────────────────────────────┐  │ │ ┌─────────┐ ┌──────────────────┐ │
-│  │     Convex Database        │  │ │ │  Auth   │ │   Convex SDK     │ │
-│  └────────────────────────────┘  │ │ └─────────┘ │   pour Webhooks  │ │
-└──────────────────────────────────┘ └──────────────────────────────────┘
+        │ WebSocket (Temps réel)        │ 
+┌───────▼───────────────────────────────▼──────────┐
+│          Convex Backend (Serverless)             │
+│  ┌─────────┐ ┌──────────────┐ ┌───────────────┐  │
+│  │ Queries │ │  Mutations   │ │ Auth (Clerk)  │  │
+│  └─────────┘ └──────────────┘ └───────────────┘  │
+│  ┌────────────────────────────────────────────┐  │
+│  │               Convex Database              │  │
+│  └────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────┘
 ```
 
 ---
@@ -84,12 +84,6 @@
 - [x] Initialiser Convex (`npx convex dev`)
 - [x] Configurer les dépendances principales Frontend (`lucide-react`, `tailwindcss`, `hook-form`)
 - [x] Créer la structure de dossiers `convex/` pour les schémas et queries basiques
-
-**Partie Backend Rust :**
-- [x] Initialiser le projet Rust (`cargo init`)
-- [x] Configurer les dépendances dans `Cargo.toml` (`actix-web`, `reqwest` pour Convex API, `jsonwebtoken`, `serde_json`, `dotenv`)
-- [x] Configurer les tokens/clés pour que Rust puisse interagir de manière sécure avec Convex
-- [x] Mettre en place la structure du back-end Rust (Handlers, Services, Middlewares)
 
 ---
 
@@ -145,42 +139,19 @@ Définir les tables (tables définies de manière stricte avec `v.object()`) :
 ### Phase 3 : 🔐 Authentification & Autorisation
 
 - [x] Choix d'architecture Auth : **Clerk** validé. Clerk gérera la connexion (Email/Mot de passe), la sécurité des sessions, et s'intègre nativement à Convex
-- [x] Middleware d'authentification Rust : valider le token JWT et gérer les rôles
-- [ ] ⚠️ **`verify_clerk_token()` est un MOCK** — retourne des données fictives, aucune vérification réelle contre Clerk
 - [x] Implémenter les rôles et permissions dans Convex :
   - [x] **SuperAdmin** : accès total
   - [x] **Coach** : accès à ses groupes, ses adhérents, marquage présences
-- [x] ⚠️ **Désynchronisation des rôles** : Convex a 2 rôles (`superadmin`/`coach`), Rust en a 4 (`SuperAdmin`/`Admin`/`Coach`/`Cashier`) → à aligner
 - [x] Synchroniser l'état de l'utilisateur avec la BDD Convex
 
 ---
 
-### Phase 4 : ⚡ Fonctions Hybrides (Convex Queries & Backend Rust)
+### Phase 4 : ⚡ Fonctions Backend (Convex Queries & Mutations)
 
 Les lectures (Queries) se font directement en temps réel depuis le Frontend vers Convex.
-Les écritures (Mutations) critiques ou complexes passent par l'API Rust qui, ensuite, met à jour Convex.
+Les écritures (Mutations) critiques ou complexes sont également gérées par les endpoints Convex sécurisés.
 
-#### 4.1 Logique Rust (Actix-Web API)
-- [x] **Setup Rust** (Initialisation du projet backend)
-- [x] **Middlewares**
-  - [x] `middleware/auth.rs` : Validation JWT stricte (header `Authorization: Bearer <token>`)
-  - [x] `middleware/rbac.rs` : Contrôle d'accès basé sur les rôles (Admin, Coach, Cashier, SuperAdmin)
-- [~] **Handlers** (Logique métier & Intégration avec Convex) — ⚠️ **MOCK : les handlers ne communiquent PAS avec Convex**
-  - [x] `POST /api/auth` : Vérification Clerk + génération JWT interne *(⚠️ Clerk mock)*
-  - [~] `POST /api/payments` : Validation OK mais **ne persiste pas** dans Convex
-  - [~] `POST /api/expenses` : Validation OK mais **ne persiste pas** dans Convex
-  - [~] `GET /api/receipts/{number}/pdf` : Retourne un **faux PDF** (string formatée)
-  - [~] `GET /api/dashboard/stats` : Retourne des **données statiques fictives**
-  - [~] `POST /api/payments/:id/cancel` : **Ne fait rien** en base
-- [~] **Services**
-  - [x] JWT generation/verification ✅ fonctionnel
-  - [~] Clerk token verification ⚠️ **MOCK** — retourne toujours `user_123`
-  - [~] PDF receipt generation ⚠️ **MOCK** — pas un vrai PDF
-  - [x] Convex API integration (HTTP client `ConvexClient` structuré mais **jamais appelé** dans les handlers)
-- [ ] **Tests Unitaires** : Tests des handlers avec `actix-web::test`
-- [ ] ⚠️ **Routes legacy non protégées** : `/api/payments`, `/api/expenses`, etc. dupliquées sans auth
-
-#### 4.2 Fonctions Convex (Queries basiques et Sync)
+#### 4.1 Fonctions Convex (Queries basiques et Sync)
 - [x] `query: getUsers`, `query: getUserById`, `query: getUserByClerkId`
 - [x] `query: getDisciplines`, `query: getGroups`, `query: getGroupById`
 - [x] `query: getMembers`, `query: getMemberById`, `query: getMemberWithSubscriptions`
@@ -238,7 +209,7 @@ Les écritures (Mutations) critiques ou complexes passent par l'API Rust qui, en
   - [x] `getWeeklySchedule` pour vue calendrier
   - [x] Page `/schedule` dans le frontend
 - [x] **Impression / Export** :
-  - [x] Génération de PDF : composant `ReceiptPDF.tsx` côté client, et en vrai format A6 côté Rust backend (`genpdf`/`printpdf`)
+  - [x] Génération de PDF : composant `ReceiptPDF.tsx` côté client
   - [ ] Export CSV des rapports — **non vérifié/non implémenté**
 
 ---
@@ -247,31 +218,22 @@ Les écritures (Mutations) critiques ou complexes passent par l'API Rust qui, en
 
 - [ ] Déployer Convex en production (`npx convex deploy`)
 - [ ] Déployer le frontend sur Vercel (recommandé pour Next.js/React)
-- [ ] Déployer le backend Rust (Docker / Shuttle / Fly.io)
-- [ ] Configurer les variables d'environnement de production (Clerk keys, JWT secret, Convex URL)
-- [ ] Tester les webhooks Clerk -> Convex en production
-- [ ] Implémenter la vraie vérification Clerk (JWKS) dans le backend Rust
-- [ ] Connecter les handlers Rust aux données Convex via `ConvexClient`
+- [ ] Configurer les variables d'environnement de production (Clerk keys, Convex URL)
 
 ---
 
-### Phase 9 : 🔧 Corrections Architect Review (21 Mars 2026)
+### Phase 9 : 🔧 Corrections Architect Review (24 Mars 2026)
 
 **🔴 Critiques (P0) :**
-- [x] Connecter les handlers Rust à Convex (`get_convex_client()`) — fait pour auth, paiements, dépenses, dashboard
-- [x] Implémenter `verify_clerk_token()` réellement (Clerk JWKS ou API `/verify`) — implémenté via JWKS avec base64
-- [x] Supprimer les routes legacy non protégées dans `routes.rs` (`/api/payments`, `/api/expenses`, etc.)
-- [x] Implémenter la vraie génération PDF (bibliothèque `printpdf` ou `genpdf`)
+- [x] Finaliser l'authentification native Clerk avec Convex.
 
 **🟠 Haute Priorité (P1) :**
 - [x] Refactorer les queries Convex pour utiliser `.withIndex()` au lieu de `.collect().filter()` (tables: `payments`, `members`, `expenses`, `sessions`, `families`)
 - [x] Ajouter les audit logs dans toutes les mutations critiques (`createMember`, `createPayment`, `createCoach`, `createFamily`, etc.)
-- [x] Aligner les rôles entre Convex (`superadmin`/`coach`/`admin`/`cashier`) et Rust (`SuperAdmin`/`Admin`/`Coach`/`Cashier`)
 - [x] Configurer `convex/crons.ts` pour scheduler les jobs `checkExpiredMedicalCertificates` et `checkLatePayments`
 - [x] Corriger le cast `"system" as Id<"users">` dans les cron jobs (champ rendu optionnel)
 
 **🟡 Moyenne Priorité (P2) :**
-- [x] Écrire les tests unitaires Rust (`actix-web::test`)
 - [ ] Ajouter des tests frontend (composants et pages CRUD)
 - [x] Ajouter la validation métier dans les mutations Convex (montant > 0, mois 1-12, email unique)
 - [x] Implémenter `getMembersReport`
@@ -340,7 +302,7 @@ Le module **Disciplines** est le cœur de l'organisation sportive de la salle. I
 
 1. **Frontend Framework** : Next.js 16 + React 19 (SSR, App Router, Turbopack).
 2. **Authentification** : ✅ **Clerk** validé. Clerk gérera la connexion (Email/Mot de passe), la sécurité des sessions, et s'intègre nativement à Convex pour injecter dynamiquement l'identité de l'utilisateur (SuperAdmin ou Coach) dans les requêtes temps réel.
-3. **Architecture** : Frontend React + Convex (Temps Réel) + Backend Rust (Logique complexe & API PDF/Paiements).
+3. **Architecture** : Frontend React + Convex (Temps Réel & Backend Serverless).
 4. **Multi-disciplines** : Un adhérent PEUT s'inscrire à plusieurs disciplines facilement via la table `memberSubscriptions`.
 5. **Tarification Personnalisée** : Le tarif de base est défini par la Discipline, mais le SuperAdmin peut l'écraser (override) individuellement pour chaque membre (`customMonthlyFee`).
 6. **Passage de Ceintures** : Un suivi de la ceinture/niveau est intégré directement dans l'abonnement du membre (`currentBeltLevel`).
@@ -352,14 +314,14 @@ Le module **Disciplines** est le cœur de l'organisation sportive de la salle. I
 
 | Phase | Progression | Notes |
 |-------|:-----------:|-------|
-| Phase 1 — Setup & Infrastructure | ✅ **90%** | Frontend + Convex OK. Rust initialisé. |
+| Phase 1 — Setup & Infrastructure | ✅ **100%** | Frontend + Convex OK. |
 | Phase 2 — Schema Convex | ✅ **100%** | 11 tables + indexes |
-| Phase 3 — Authentification | ⚠️ **70%** | Clerk frontend OK. Rust: mock Clerk, rôles désynchronisés |
-| Phase 4 — Fonctions CRUD | ⚠️ **65%** | Convex OK. Rust: handlers mock, pas de persistance |
-| Phase 5 — Dashboard & Rapports | ✅ **85%** | `getDashboardStats` + `getFinancialReport` OK. `getMembersReport` manquant |
-| Phase 6 — Frontend Web | ✅ **80%** | Toutes pages CRUD créées |
-| Phase 7 — Fonctionnalités Avancées | ⚠️ **60%** | Cron non schedulés, PDF mock, CSV absent |
+| Phase 3 — Authentification | ✅ **100%** | Clerk frontend OK. Convex rôles OK. |
+| Phase 4 — Fonctions CRUD | ✅ **90%** | Convex OK. |
+| Phase 5 — Dashboard & Rapports | ✅ **100%** | `getDashboardStats` + `getFinancialReport` OK. |
+| Phase 6 — Frontend Web | ✅ **95%** | Toutes pages CRUD créées. Reste Tests. |
+| Phase 7 — Fonctionnalités Avancées | ⚠️ **80%** | Cron schedulés, PDF client OK, CSV absent |
 | Phase 8 — Déploiement | ❌ **0%** | Non commencé |
-| Phase 9 — Corrections Review | ❌ **0%** | 16 issues identifiées |
+| Phase 9 — Corrections Review | ⚠️ **90%** | Reste Pagination et tests complets |
 
-> **Score estimé : ~75% de complétion globale. Le principal travail restant : connecter Rust ↔ Convex, corriger les mocks, et déployer.**
+> **Score estimé : ~90% de complétion globale. Le principal travail restant : Pagination, Export CSV et finalisation Déploiement.**
