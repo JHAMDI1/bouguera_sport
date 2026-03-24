@@ -154,12 +154,12 @@ export default function FamiliesPage() {
               className="btn btn-subtle"
               title="Exporter en CSV"
             >
-              <Download className="h-4 w-4 mr-2" />
-              Export
+              <Download className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Export</span>
             </button>
             <button onClick={() => setIsCreateModalOpen(true)} className="btn btn-primary">
-              <Plus className="h-4 w-4 mr-2" />
-              Nouvelle Famille
+              <Plus className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Nouvelle Famille</span>
             </button>
           </div>
         }

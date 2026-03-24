@@ -7,7 +7,7 @@ import type { CoachFormData, UpdateCoachFormData } from "@/schemas";
 import { Doc, Id } from "../../../convex/_generated/dataModel";
 
 export function useCoaches() {
-    const coaches = useQuery(api.users.getUsers, { role: "coach" });
+    const coaches = useQuery(api.users.getUsers, {});
 
     const createCoachMutation = useMutation(api.coaches.createCoach);
     const updateCoachMutation = useMutation(api.coaches.updateCoach);

@@ -7,14 +7,15 @@ export const createCoach = mutation({
     email: v.string(),
     fullName: v.string(),
     phone: v.optional(v.string()),
+    role: v.union(v.literal("admin"), v.literal("cashier"), v.literal("coach")),
     createdBy: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
-    const { createdBy, ...coachData } = args;
+    const { createdBy, role, ...coachData } = args;
     const coachId = await ctx.db.insert("users", {
       ...coachData,
-      role: "coach",
+      role: role,
       isActive: true,
       createdAt: Date.now(),
     });
@@ -22,10 +23,10 @@ export const createCoach = mutation({
     if (createdBy) {
       await ctx.db.insert("auditLog", {
         userId: createdBy,
-        action: "COACH_CREATED",
+        action: "STAFF_CREATED",
         entityType: "user",
         entityId: coachId,
-        details: `Coach créé: ${args.fullName} (${args.email})`,
+        details: `Membre du staff créé: ${args.fullName} (${args.email}) - Rôle: ${role}`,
         createdAt: Date.now(),
       });
     }
@@ -38,6 +39,7 @@ export const updateCoach = mutation({
     id: v.id("users"),
     fullName: v.optional(v.string()),
     phone: v.optional(v.string()),
+    role: v.optional(v.union(v.literal("admin"), v.literal("cashier"), v.literal("coach"))),
     isActive: v.optional(v.boolean()),
     updatedBy: v.optional(v.id("users")),
   },

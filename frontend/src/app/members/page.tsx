@@ -139,8 +139,8 @@ export default function MembersPage() {
         icon={<Users className="h-6 w-6" />}
         action={
           <button onClick={() => setIsCreateModalOpen(true)} className="btn btn-primary">
-            <Plus className="h-4 w-4 mr-2" />
-            Nouvel Adhérent
+            <Plus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Nouvel Adhérent</span>
           </button>
         }
       />

@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 
 export const getUsers = query({
-  args: { role: v.optional(v.union(v.literal("superadmin"), v.literal("coach"))) },
+  args: { role: v.optional(v.union(v.literal("superadmin"), v.literal("admin"), v.literal("cashier"), v.literal("coach"))) },
   handler: async (ctx, args) => {
     const role = args.role;
     if (role) {
@@ -36,10 +36,23 @@ export const syncUser = mutation({
 
     const { subject, email, name, pictureUrl } = identity;
 
-    const existingUser = await ctx.db
+    let existingUser = await ctx.db
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", subject))
       .first();
+
+    // Fusion: si le compte n'a pas de clerkId mais existe via email (ex: créé par le Superadmin)
+    if (!existingUser && email) {
+      existingUser = await ctx.db
+        .query("users")
+        .withIndex("by_email", (q) => q.eq("email", email))
+        .first();
+
+      if (existingUser) {
+        // Lier le compte Clerk à cet utilisateur (conserve son rôle prédéfini)
+        await ctx.db.patch(existingUser._id, { clerkId: subject });
+      }
+    }
 
     if (existingUser) {
       const isSuperAdmin = email === "sahbibouguerra186@gmail.com" || email === "soltanwerghi@gmail.com";
@@ -47,10 +60,16 @@ export const syncUser = mutation({
       if (isSuperAdmin && existingUser.role !== "superadmin") {
         await ctx.db.patch(existingUser._id, { role: "superadmin" });
       }
-      // Si la photo a changé, on peut mettre à jour aussi
+      // Si la photo a changé, on peut la mettre à jour
       if (pictureUrl && existingUser.photoUrl !== pictureUrl) {
         await ctx.db.patch(existingUser._id, { photoUrl: pictureUrl });
       }
+
+      // S'assurer que l'email est rempli si c'était vide avant
+      if (email && existingUser.email === "") {
+        await ctx.db.patch(existingUser._id, { email: email });
+      }
+
       return existingUser._id;
     }
 

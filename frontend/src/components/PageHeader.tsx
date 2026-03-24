@@ -12,7 +12,7 @@ export function PageHeader({ title, description, icon, action, children }: PageH
     return (
         <header className="bg-background-elevated border-b border-border shadow-sm sticky top-0 z-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-y-4">
                     <div className="flex items-center">
                         {icon && <div className="text-primary-text mr-3 flex items-center">{icon}</div>}
                         <div>

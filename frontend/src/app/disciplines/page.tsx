@@ -176,8 +176,8 @@ export default function DisciplinesPage() {
         icon={<Activity className="h-6 w-6" />}
         action={
           <button onClick={() => setIsCreateModalOpen(true)} className="btn btn-primary">
-            <Plus className="h-4 w-4 mr-2" />
-            Nouvelle Discipline
+            <Plus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Nouvelle Discipline</span>
           </button>
         }
       >

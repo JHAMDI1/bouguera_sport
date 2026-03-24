@@ -17,6 +17,7 @@ import { DataTable, type Column } from "@/components/DataTable";
 import { StatusBadge } from "@/components/StatusBadge";
 import { FormModal } from "@/components/FormModal";
 import { FormInput } from "@/components/FormInput";
+import { FormSelect } from "@/components/FormSelect";
 import { Avatar } from "@/components/Avatar";
 import { DropdownMenu, DropdownItem } from "@/components/DropdownMenu";
 
@@ -31,7 +32,10 @@ export default function CoachesPage() {
     handleSubmit: handleSubmitCreate,
     reset: resetCreate,
     formState: { errors: createErrors },
-  } = useForm<CoachFormData>({ resolver: zodResolver(coachSchema) });
+  } = useForm<CoachFormData>({
+    resolver: zodResolver(coachSchema),
+    defaultValues: { role: "coach" }
+  });
 
   const {
     register: registerUpdate,
@@ -57,7 +61,7 @@ export default function CoachesPage() {
 
   const openEditModal = (coach: any) => {
     setEditingCoach(coach);
-    resetUpdate({ fullName: coach.fullName, phone: coach.phone || "", isActive: coach.isActive });
+    resetUpdate({ fullName: coach.fullName, phone: coach.phone || "", role: coach.role, isActive: coach.isActive });
   };
 
   const columns: Column<any>[] = [
@@ -88,6 +92,23 @@ export default function CoachesPage() {
       )
     },
     {
+      header: "Rôle",
+      accessor: (coach) => {
+        const roleLabels: Record<string, { label: string, classes: string }> = {
+          superadmin: { label: "SuperAdmin", classes: "bg-purple-100 text-purple-800 border-purple-200" },
+          admin: { label: "Admin", classes: "bg-danger/10 text-danger border-danger/20" },
+          cashier: { label: "Caissier", classes: "bg-warning/10 text-warning border-warning/20" },
+          coach: { label: "Coach", classes: "bg-primary/10 text-primary border-primary/20" },
+        };
+        const r = roleLabels[coach.role] || roleLabels.coach;
+        return (
+          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${r.classes}`}>
+            {r.label}
+          </span>
+        );
+      }
+    },
+    {
       header: "Statut",
       accessor: (coach) => (
         <StatusBadge
@@ -116,12 +137,12 @@ export default function CoachesPage() {
   return (
     <div className="min-h-screen bg-background">
       <PageHeader
-        title="Gestion des Coachs"
+        title="Staff & Coachs"
         icon={<UserCircle className="h-6 w-6" />}
         action={
           <button onClick={() => setIsCreateModalOpen(true)} className="btn btn-primary">
-            <Plus className="h-4 w-4 mr-2" />
-            Nouveau Coach
+            <Plus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Nouveau Membre</span>
           </button>
         }
       />
@@ -139,26 +160,38 @@ export default function CoachesPage() {
       <FormModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        title="Nouveau Coach"
+        title="Nouveau Membre (Staff)"
         isSubmitting={isSubmitting}
         onSubmit={handleSubmitCreate(onCreateSubmit)}
         submitText="Créer"
       >
-        <FormInput label="Email" registration={registerCreate("email")} error={createErrors.email} type="email" placeholder="coach@example.com" disabled={isSubmitting} />
+        <FormInput label="Email" registration={registerCreate("email")} error={createErrors.email} type="email" placeholder="staff@example.com" disabled={isSubmitting} />
         <FormInput label="Nom complet" registration={registerCreate("fullName")} error={createErrors.fullName} placeholder="John Doe" disabled={isSubmitting} />
         <FormInput label="Téléphone" registration={registerCreate("phone")} type="tel" placeholder="+216 XX XXX XXX" disabled={isSubmitting} />
+
+        <FormSelect label="Rôle" registration={registerCreate("role")} error={createErrors.role} disabled={isSubmitting}>
+          <option value="coach">Coach</option>
+          <option value="cashier">Caissier</option>
+          <option value="admin">Administrateur</option>
+        </FormSelect>
       </FormModal>
 
       <FormModal
         isOpen={!!editingCoach}
         onClose={() => setEditingCoach(null)}
-        title="Modifier Coach"
+        title="Modifier Membre"
         isSubmitting={isSubmitting}
         onSubmit={handleSubmitUpdate(onUpdateSubmit)}
         submitText="Mettre à jour"
       >
         <FormInput label="Nom complet" registration={registerUpdate("fullName")} error={updateErrors.fullName} disabled={isSubmitting} />
         <FormInput label="Téléphone" registration={registerUpdate("phone")} type="tel" disabled={isSubmitting} />
+
+        <FormSelect label="Rôle" registration={registerUpdate("role")} error={updateErrors.role} disabled={isSubmitting}>
+          <option value="coach">Coach</option>
+          <option value="cashier">Caissier</option>
+          <option value="admin">Administrateur</option>
+        </FormSelect>
 
         <div>
           <label className="flex items-center gap-2 cursor-pointer">

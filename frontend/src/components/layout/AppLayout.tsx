@@ -5,6 +5,7 @@ import { Sidebar } from "../navigation/Sidebar";
 import { BottomNavBar } from "../navigation/BottomNavBar";
 import { UserButton } from "@clerk/nextjs";
 import { SyncUser } from "../auth/SyncUser";
+import { MobileMenu } from "../navigation/MobileMenu";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -21,7 +22,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
                 {/* Uniquement visible sur mobile : un header avec le bouton User */}
                 <div className="md:hidden h-14 bg-background-elevated/80 backdrop-blur-md border-b border-border flex items-center justify-between px-4 z-20 shadow-sm sticky top-0">
-                    <span className="font-display font-bold text-lg tracking-tight text-foreground">Sahbi Gym</span>
+                    <div className="flex items-center gap-2">
+                        <MobileMenu />
+                        <span className="font-display font-bold text-lg tracking-tight text-foreground">Sahbi Gym</span>
+                    </div>
                     <UserButton />
                 </div>
 

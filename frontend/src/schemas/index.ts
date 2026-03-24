@@ -74,11 +74,13 @@ export const coachSchema = z.object({
     email: z.string().email("Email invalide"),
     fullName: z.string().min(2, "Nom complet requis"),
     phone: z.string().optional(),
+    role: z.enum(["admin", "cashier", "coach"]),
 });
 
 export const updateCoachSchema = z.object({
     fullName: z.string().min(2, "Nom complet requis"),
     phone: z.string().optional(),
+    role: z.enum(["admin", "cashier", "coach"]),
     isActive: z.boolean(),
 });
 
