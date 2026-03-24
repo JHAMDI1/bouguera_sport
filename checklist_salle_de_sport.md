@@ -150,7 +150,7 @@ Définir les tables (tables définies de manière stricte avec `v.object()`) :
 - [x] Implémenter les rôles et permissions dans Convex :
   - [x] **SuperAdmin** : accès total
   - [x] **Coach** : accès à ses groupes, ses adhérents, marquage présences
-- [ ] ⚠️ **Désynchronisation des rôles** : Convex a 2 rôles (`superadmin`/`coach`), Rust en a 4 (`SuperAdmin`/`Admin`/`Coach`/`Cashier`) → à aligner
+- [x] ⚠️ **Désynchronisation des rôles** : Convex a 2 rôles (`superadmin`/`coach`), Rust en a 4 (`SuperAdmin`/`Admin`/`Coach`/`Cashier`) → à aligner
 - [x] Synchroniser l'état de l'utilisateur avec la BDD Convex
 
 ---

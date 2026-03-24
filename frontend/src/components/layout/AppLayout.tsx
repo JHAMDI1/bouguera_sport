@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { Sidebar } from "../navigation/Sidebar";
 import { BottomNavBar } from "../navigation/BottomNavBar";
 import { UserButton } from "@clerk/nextjs";
+import { SyncUser } from "../auth/SyncUser";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -15,6 +16,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
     return (
         <div className="flex h-screen overflow-hidden bg-background">
+            <SyncUser />
             <Sidebar />
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
                 {/* Uniquement visible sur mobile : un header avec le bouton User */}

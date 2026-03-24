@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 
 export const getUsers = query({
   args: { role: v.optional(v.union(v.literal("superadmin"), v.literal("coach"))) },
@@ -24,4 +24,44 @@ export const getUserByClerkId = query({
   handler: async (ctx, args) => {
     return await ctx.db.query("users").withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId)).unique();
   },
+});
+
+export const syncUser = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return null;
+    }
+
+    const { subject, email, name, pictureUrl } = identity;
+
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", subject))
+      .first();
+
+    if (existingUser) {
+      if (email === "sahbibouguerra186@gmail.com" && existingUser.role !== "superadmin") {
+        await ctx.db.patch(existingUser._id, { role: "superadmin" });
+      }
+      // Si la photo a changé, on peut mettre à jour aussi
+      if (pictureUrl && existingUser.photoUrl !== pictureUrl) {
+        await ctx.db.patch(existingUser._id, { photoUrl: pictureUrl });
+      }
+      return existingUser._id;
+    }
+
+    const role = email === "sahbibouguerra186@gmail.com" ? "superadmin" : "coach";
+
+    return await ctx.db.insert("users", {
+      clerkId: subject,
+      email: email || "",
+      fullName: name || "Utilisateur",
+      photoUrl: pictureUrl,
+      role: role,
+      isActive: true,
+      createdAt: Date.now(),
+    });
+  }
 });
